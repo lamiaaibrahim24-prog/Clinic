@@ -1,1951 +1,1955 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>حاسبة مستحقات الطبيب — تسجيل عيادة بعيادة</title>
-  <!-- Google Fonts: Cairo -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Cairo', 'sans-serif'],
-          },
-          colors: {
-            teal: {
-              700: '#0f766e',
-              800: '#115e59',
-              900: '#134e4a',
-            }
-          }
-        }
-      }
-    };
-  </script>
-  <style>
-    body {
-      font-family: 'Cairo', sans-serif;
-      background-color: #f1f5f9;
-      color: #1e293b;
-    }
-    .tabular-nums {
-      font-variant-numeric: tabular-nums;
-    }
-    input[type="number"].counter-input::-webkit-inner-spin-button,
-    input[type="number"].counter-input::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    input[type="number"].counter-input {
-      -moz-appearance: textfield;
-    }
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-    @media print {
-      body {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-      }
-      .no-print {
-        display: none !important;
-      }
-      .print-only {
-        display: block !important;
-      }
-      .print-card {
-        box-shadow: none !important;
-        border: 1px solid #cbd5e1 !important;
-        break-inside: avoid;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="حاسبة العيادة">
+<title>حاسبة مستحقات العيادة الشهرية</title>
+<style>
+  :root {
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --primary: #0f172a;
+    --accent: #0284c7;
+    --cash: #059669;
+    --cash-bg: #ecfdf5;
+    --cash-border: #a7f3d0;
+    --cont: #2563eb;
+    --cont-bg: #eff6ff;
+    --cont-border: #bfdbfe;
+    --warn: #d97706;
+    --danger: #dc2626;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    padding: 0 0 90px 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Arabic", "Segoe UI", Tahoma, Arial, sans-serif;
+    line-height: 1.45;
+  }
+  header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    color: #fff;
+    padding: 15px 14px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+  .badge-cloud {
+    background: rgba(56, 189, 248, 0.22);
+    border: 1px solid rgba(56, 189, 248, 0.55);
+    color: #bae6fd;
+    font-size: 0.7rem;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+  .toolbar {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .btn {
+    border: none;
+    border-radius: 10px;
+    padding: 8px 11px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-light { background: rgba(255,255,255,0.15); color: #fff; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-success { background: var(--cash); color: #fff; width: 100%; justify-content: center; padding: 13px; font-size: 0.96rem; }
+  .btn-outline { background: #fff; color: var(--text); border: 1px solid var(--border); }
+  .btn-danger { background: #fee2e2; color: var(--danger); }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 12px;
+  }
+
+  /* Summary KPIs */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
+    margin-bottom: 12px;
+  }
+  @media (min-width: 640px) {
+    .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  .kpi {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 11px 12px;
+    border: 1px solid var(--border);
+  }
+  .kpi.highlight {
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+    color: #fff;
+    border: none;
+  }
+  .kpi-label { font-size: 0.73rem; opacity: 0.88; margin-bottom: 3px; }
+  .kpi-val { font-size: 1.18rem; font-weight: 800; }
+  .kpi-sub { font-size: 0.69rem; opacity: 0.82; margin-top: 2px; }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 13px;
+    margin-bottom: 13px;
+    border: 1px solid var(--border);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 9px;
+    margin-bottom: 11px;
+    gap: 8px;
+  }
+  .card-title {
+    font-size: 0.96rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--primary);
+  }
+  .card-total {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  /* Section Banners */
+  .sec-banner {
+    background: #eff6ff;
+    border-right: 4px solid var(--accent);
+    padding: 9px 11px;
+    border-radius: 9px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin: 18px 0 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sec-sub-banner {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--muted);
+    margin: 10px 0 7px 0;
+  }
+  .hint-note {
+    background: #f8fafc;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.74rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  /* Form Inputs */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  @media (max-width: 480px) {
+    .form-row { grid-template-columns: 1fr; }
+  }
+  label.field-label {
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  input[type="date"], input[type="month"], input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: #f8fafc;
+    color: var(--text);
+  }
+
+  /* Consult 3-column grid */
+  .consult-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  @media (max-width: 520px) {
+    .consult-grid { grid-template-columns: 1fr; }
+  }
+  .mini-box {
+    border-radius: 12px;
+    padding: 10px;
+    border: 1px solid var(--border);
+  }
+  .mini-box.cash { background: var(--cash-bg); border-color: var(--cash-border); }
+  .mini-box.cont { background: var(--cont-bg); border-color: var(--cont-border); }
+  .mini-title { font-size: 0.84rem; font-weight: 800; margin-bottom: 2px; }
+  .mini-price { font-size: 0.74rem; color: var(--text); font-weight: 700; margin-bottom: 7px; }
+
+  /* Nerve Component Cards (All open & visible) */
+  .comp-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    background: #fff;
+    overflow: hidden;
+  }
+  .comp-card-head {
+    padding: 9px 12px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .comp-card.g-cash .comp-card-head { background: var(--cash-bg); color: #065f46; border-bottom: 1px solid var(--cash-border); }
+  .comp-card.g-cont .comp-card-head { background: var(--cont-bg); color: #1e40af; border-bottom: 1px solid var(--cont-border); }
+  .comp-badge {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--primary);
+    font-weight: 800;
+  }
+  .comp-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 9px;
+  }
+  @media (min-width: 600px) {
+    .comp-grid-4 { grid-template-columns: repeat(4, 1fr); }
+  }
+  .comp-item {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 7px;
+    background: #fafafa;
+    text-align: center;
+  }
+  .comp-item-name { font-size: 0.8rem; font-weight: 800; margin-bottom: 2px; }
+  .comp-item-price { font-size: 0.72rem; color: var(--accent); font-weight: 700; margin-bottom: 5px; }
+
+  /* Standard 2-Column Service Row */
+  .col-headers {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr 1fr;
+    gap: 7px;
+    padding: 6px 8px;
+    background: #f8fafc;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  .col-headers div:first-child { text-align: right; }
+  .h-cash { color: var(--cash); }
+  .h-cont { color: var(--cont); }
+
+  .service-row {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr 1fr;
+    gap: 7px;
+    align-items: center;
+    padding: 8px 4px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .service-row:last-child { border-bottom: none; }
+  .svc-name { font-size: 0.83rem; font-weight: 700; }
+  .svc-prices { font-size: 0.71rem; color: var(--accent); font-weight: 700; }
+
+  /* 5-way Multi Card */
+  .multi-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #fff;
+  }
+  .multi-card-title {
+    font-size: 0.86rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .row-sub-amt {
+    font-size: 0.76rem;
+    color: var(--accent);
+    font-weight: 800;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  @media (max-width: 420px) {
+    .grid-3 { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+  .sub-cell {
+    border-radius: 10px;
+    padding: 7px;
+    text-align: center;
+  }
+  .sub-cell.cash { background: var(--cash-bg); border: 1px solid var(--cash-border); }
+  .sub-cell.cont { background: var(--cont-bg); border: 1px solid var(--cont-border); }
+  .sub-lbl { font-size: 0.76rem; font-weight: 800; }
+  .sub-prc { font-size: 0.7rem; font-weight: 700; color: var(--muted); margin-bottom: 5px; }
+
+  /* Counter Control with editable number input */
+  .counter-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 9px;
+    padding: 3px;
+    background: #fff;
+  }
+  .counter-box.cash { border: 1px solid var(--cash-border); }
+  .counter-box.cont { border: 1px solid var(--cont-border); }
+  .c-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 7px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    flex-shrink: 0;
+  }
+  .cash .c-btn { color: var(--cash); }
+  .cont .c-btn { color: var(--cont); }
+  input.c-input {
+    width: 42px;
+    padding: 2px;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-size: 0.96rem;
+    font-weight: 800;
+    color: var(--primary);
+    -moz-appearance: textfield;
+  }
+  input.c-input::-webkit-outer-spin-button,
+  input.c-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Log Table */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.79rem;
+  }
+  th, td {
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border);
+    text-align: right;
+  }
+  th { background: #f8fafc; font-weight: 800; color: var(--muted); white-space: nowrap; }
+
+  /* Modal */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.62);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 16px;
+    max-width: 640px;
+    width: 100%;
+    max-height: 86vh;
+    overflow-y: auto;
+    padding: 15px;
+  }
+  .price-edit-row {
+    display: grid;
+    grid-template-columns: 1.8fr 1fr;
+    gap: 8px;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+    font-size: 0.8rem;
+  }
+  .reconcile-box {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    font-size: 0.84rem;
+  }
+  .diff-pos { color: var(--cash); font-weight: 800; }
+  .diff-neg { color: var(--danger); font-weight: 800; }
+</style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body>
 
-  <!-- ===================================================================== -->
-  <!-- TOP HEADER & QUICK ACTIONS                                            -->
-  <!-- ===================================================================== -->
-  <header class="bg-gradient-to-l from-slate-900 via-teal-800 to-teal-700 text-white shadow-md sticky top-0 z-30 no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
-      <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
-        <!-- Brand -->
-        <div class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center shrink-0">
-            <svg class="w-6 h-6 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div>
-            <h1 class="text-lg sm:text-xl font-extrabold tracking-tight leading-snug">حاسبة مستحقات الطبيب — تسجيل عيادة بعيادة</h1>
-            <p class="text-xs text-teal-100/90">تسجيل أعداد الحالات لكل يوم عيادة بالتاريخ • بدون أسماء مرضى أو أرقام مستندات</p>
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex flex-wrap items-center gap-2">
-          <!-- Sample Presets -->
-          <div class="flex flex-wrap items-center gap-1.5 bg-black/20 p-1 rounded-xl border border-white/15">
-            <span class="text-[11px] text-teal-100 px-1.5 font-bold">نماذج جاهزة:</span>
-            <button type="button" onclick="loadSampleMonth('2026-10')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition cursor-pointer">
-              مثال عيادات أكتوبر
-            </button>
-            <button type="button" onclick="loadSampleMonth('2026-09')" class="px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition cursor-pointer">
-              مثال عيادات سبتمبر
-            </button>
-          </div>
-
-          <!-- Edit Price List -->
-          <button type="button" onclick="openSettingsModal()" class="px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-            <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-            </svg>
-            <span>تعديل لائحة الأسعار</span>
-          </button>
-
-          <!-- Export CSV -->
-          <button type="button" onclick="exportActiveMonthCSV()" class="px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-            <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span>تصدير Excel (CSV)</span>
-          </button>
-
-          <!-- Print -->
-          <button type="button" onclick="window.print()" class="px-3 py-2 rounded-xl bg-white text-teal-900 hover:bg-teal-50 text-xs font-extrabold shadow-sm transition flex items-center gap-1.5 cursor-pointer">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-            </svg>
-            <span>طباعة الكشف</span>
-          </button>
-        </div>
-      </div>
+<header>
+  <div class="header-top">
+    <div>
+      <h1>حاسبة مستحقات العيادة الشهرية</h1>
+      <div style="font-size:0.72rem; opacity:0.86;">تسجيل عيادة بعيادة بالتاريخ — بدون أسماء مرضى</div>
     </div>
-  </header>
+    <span class="badge-cloud">🌐 نسخة GitHub السحابية</span>
+  </div>
+  <div class="toolbar">
+    <button type="button" class="btn btn-light" onclick="openPriceModal()">⚙️ تعديل الأسعار</button>
+    <button type="button" class="btn btn-light" onclick="loadSample('oct')">📥 مثال أكتوبر</button>
+    <button type="button" class="btn btn-light" onclick="loadSample('sep')">📥 مثال سبتمبر</button>
+    <button type="button" class="btn btn-light" onclick="exportCSV()">📊 تصدير Excel</button>
+    <button type="button" class="btn btn-light" onclick="exportBackupJSON()">💾 حفظ نسخة احتياطية</button>
+    <button type="button" class="btn btn-light" onclick="document.getElementById('importFile').click()">📂 استرجاع نسخة</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackupJSON(event)">
+  </div>
+</header>
 
-  <!-- Print-only Header -->
-  <div class="hidden print-only max-w-7xl mx-auto px-6 pt-4 pb-3 border-b-2 border-slate-300">
-    <div class="flex justify-between items-center">
+<div class="container">
+
+  <!-- Month Selector -->
+  <div class="card" style="padding:11px;">
+    <div class="form-row" style="margin-bottom:0; align-items:end;">
       <div>
-        <h2 class="text-xl font-extrabold">كشف مستحقات الطبيب الشهرية (سجل العيادات)</h2>
-        <p id="printPeriodLabel" class="text-sm font-bold text-slate-700 mt-0.5">الشهر المحاسبي: نوفمبر 2026</p>
+        <label class="field-label">الشهر المحاسبي المعروض</label>
+        <input type="month" id="activeMonth" onchange="renderAll()">
       </div>
-      <div class="text-left text-xs text-slate-600">
-        <p>تاريخ الطباعة: <span id="printDateLabel"></span></p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- MAIN CONTENT                                                          -->
-  <!-- ===================================================================== -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
-
-    <!-- =================================================================== -->
-    <!-- SECTION A: CLINIC-BY-CLINIC ENTRY FORM (إدخال بيانات عيادة اليوم)   -->
-    <!-- =================================================================== -->
-    <section id="clinicEntrySection" class="bg-white rounded-2xl border-2 border-teal-600/30 shadow-md overflow-hidden no-print">
-      <!-- Form Header with Date & Note -->
-      <div class="bg-gradient-to-l from-slate-800 to-teal-900 text-white px-5 py-4">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div class="flex items-center gap-3">
-            <span id="entryModeBadge" class="px-3 py-1 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-xs font-extrabold">
-              تسجيل عيادة جديدة
-            </span>
-            <div>
-              <h2 class="text-base sm:text-lg font-extrabold">إدخال بيانات عيادة اليوم</h2>
-              <p class="text-xs text-teal-100/85">اختر تاريخ العيادة وأدخل أعداد الحالات (نقدي وتعاقد) ثم أضفها إلى إجمالي الشهر</p>
-            </div>
-          </div>
-
-          <!-- Date Picker & Clinic Description -->
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-            <div class="bg-white/10 border border-white/25 rounded-xl px-3 py-1.5 flex items-center gap-2">
-              <label for="clinicDateInput" class="text-xs font-bold text-teal-100 whitespace-nowrap">تاريخ العيادة:</label>
-              <input
-                type="date"
-                id="clinicDateInput"
-                value="2026-11-17"
-                onchange="handleClinicDateChange()"
-                class="bg-white text-slate-900 text-xs sm:text-sm font-extrabold rounded-lg px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-emerald-400 tabular-nums cursor-pointer"
-              />
-              <span id="clinicDayNameBadge" class="text-xs font-bold text-amber-300 whitespace-nowrap">الثلاثاء</span>
-            </div>
-
-            <div class="bg-white/10 border border-white/25 rounded-xl px-3 py-1.5 flex items-center gap-2">
-              <label for="clinicNoteInput" class="text-xs font-bold text-teal-100 whitespace-nowrap">وصف العيادة:</label>
-              <input
-                type="text"
-                id="clinicNoteInput"
-                placeholder="مثال: عيادة الثلاثاء / مرور الداخلي"
-                class="bg-white text-slate-900 placeholder-slate-400 text-xs sm:text-sm font-semibold rounded-lg px-3 py-1 w-full sm:w-56 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Existing Date Alert Banner (shown if the chosen date already has saved data) -->
-        <div id="existingDateNotice" class="hidden mt-3 bg-amber-500/20 border border-amber-300/40 rounded-xl px-3.5 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
-          <span class="text-amber-100 font-bold">
-            ملاحظة: هذا التاريخ مسجل مسبقاً في سجل الشهر الحالي. عند الضغط على زر الإضافة سيتم دمج أو تحديث بيانات هذا اليوم.
-          </span>
-          <button type="button" onclick="loadExistingDateIntoForm()" class="px-2.5 py-1 rounded-lg bg-amber-400 text-slate-900 font-extrabold hover:bg-amber-300 transition cursor-pointer">
-            تحميل بيانات هذا التاريخ للتعديل
-          </button>
-        </div>
-      </div>
-
-      <!-- 3 Structured Count Input Cards -->
-      <div class="p-4 sm:p-6 space-y-6 bg-slate-50/70">
-
-        <!-- CARD 1: الكشوفات والمرور الداخلي -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-          <div class="bg-slate-800 text-white px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-lg bg-teal-500/25 text-teal-300 flex items-center justify-center text-xs font-extrabold">١</span>
-              <h3 class="text-sm sm:text-base font-bold">الكشوفات والمرور الداخلي</h3>
-            </div>
-            <div class="text-xs font-bold text-teal-200 tabular-nums">
-              إجمالي القسم اليوم: <strong id="daySecConsult" class="text-white">0.00</strong> ج.م
-            </div>
-          </div>
-          <div class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <!-- Cash Column -->
-            <div class="rounded-xl border-2 border-emerald-200 bg-emerald-50/40 overflow-hidden">
-              <div class="bg-emerald-700 text-white px-3.5 py-2 flex items-center justify-between text-xs font-bold">
-                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-300"></span> نقدي / أجنبي</span>
-                <span class="tabular-nums"><span id="dayConsultCashSub">0.00</span> ج.م</span>
-              </div>
-              <div id="entry-consult-cash" class="p-3 space-y-2.5"></div>
-            </div>
-            <!-- Contract Column -->
-            <div class="rounded-xl border-2 border-blue-200 bg-blue-50/40 overflow-hidden">
-              <div class="bg-blue-700 text-white px-3.5 py-2 flex items-center justify-between text-xs font-bold">
-                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-blue-300"></span> تعاقدات</span>
-                <span class="tabular-nums"><span id="dayConsultContractSub">0.00</span> ج.م</span>
-              </div>
-              <div id="entry-consult-contract" class="p-3 space-y-2.5"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- CARD 2: رسم العصب والعضلات و rTMS -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-          <div class="bg-slate-800 text-white px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-lg bg-teal-500/25 text-teal-300 flex items-center justify-center text-xs font-extrabold">٢</span>
-              <h3 class="text-sm sm:text-base font-bold">رسم العصب والعضلات و rTMS</h3>
-            </div>
-            <div class="text-xs font-bold text-teal-200 tabular-nums">
-              إجمالي القسم اليوم: <strong id="daySecNcs" class="text-white">0.00</strong> ج.م
-            </div>
-          </div>
-          <div class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <!-- Cash Column -->
-            <div class="rounded-xl border-2 border-emerald-200 bg-emerald-50/40 overflow-hidden">
-              <div class="bg-emerald-700 text-white px-3.5 py-2 flex items-center justify-between text-xs font-bold">
-                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-300"></span> نقدي / أجنبي</span>
-                <span class="tabular-nums"><span id="dayNcsCashSub">0.00</span> ج.م</span>
-              </div>
-              <div id="entry-ncs-cash" class="p-3 space-y-2.5"></div>
-            </div>
-            <!-- Contract Column -->
-            <div class="rounded-xl border-2 border-blue-200 bg-blue-50/40 overflow-hidden">
-              <div class="bg-blue-700 text-white px-3.5 py-2 flex items-center justify-between text-xs font-bold">
-                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-blue-300"></span> تعاقدات</span>
-                <span class="tabular-nums"><span id="dayNcsContractSub">0.00</span> ج.م</span>
-              </div>
-              <div id="entry-ncs-contract" class="p-3 space-y-2.5"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- CARD 3: رسم المخ بالكمبيوتر (EEG) -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-          <div class="bg-slate-800 text-white px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-lg bg-teal-500/25 text-teal-300 flex items-center justify-center text-xs font-extrabold">٣</span>
-              <h3 class="text-sm sm:text-base font-bold">رسم المخ بالكمبيوتر (EEG) — شامل المطوّل ٣ ساعات و٦ ساعات</h3>
-            </div>
-            <div class="text-xs font-bold text-teal-200 tabular-nums">
-              إجمالي القسم اليوم: <strong id="daySecEeg" class="text-white">0.00</strong> ج.م
-            </div>
-          </div>
-          <div class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <!-- Cash Column -->
-            <div class="rounded-xl border-2 border-emerald-200 bg-emerald-50/40 overflow-hidden">
-              <div class="bg-emerald-700 text-white px-3.5 py-2 flex items-center justify-between text-xs font-bold">
-                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-300"></span> نقدي / أجنبي</span>
-                <span class="tabular-nums"><span id="dayEegCashSub">0.00</span> ج.م</span>
-              </div>
-              <div id="entry-eeg-cash" class="p-3 space-y-2.5"></div>
-            </div>
-            <!-- Contract Column -->
-            <div class="rounded-xl border-2 border-blue-200 bg-blue-50/40 overflow-hidden">
-              <div class="bg-blue-700 text-white px-3.5 py-2 flex items-center justify-between text-xs font-bold">
-                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-blue-300"></span> تعاقدات</span>
-                <span class="tabular-nums"><span id="dayEegContractSub">0.00</span> ج.م</span>
-              </div>
-              <div id="entry-eeg-contract" class="p-3 space-y-2.5"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Live Day Total Bar & Submit Buttons -->
-      <div class="bg-slate-900 text-white px-5 py-4 border-t border-slate-700 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div class="flex flex-wrap items-center gap-3 sm:gap-5 text-xs sm:text-sm">
-          <div>
-            <span class="text-slate-400 block text-[11px]">إجمالي عيادة اليوم المختارة</span>
-            <strong id="dayTotalCases" class="text-lg font-extrabold text-white tabular-nums">0</strong> <span class="text-slate-300 text-xs">حالة</span>
-          </div>
-          <div class="h-8 w-px bg-slate-700 hidden sm:block"></div>
-          <div>
-            <span class="text-emerald-300 block text-[11px]">إجمالي النقدي لليوم</span>
-            <strong id="dayTotalCashMoney" class="text-base sm:text-lg font-extrabold text-emerald-400 tabular-nums">0.00</strong> <span class="text-xs text-slate-400">ج.م</span>
-          </div>
-          <div class="h-8 w-px bg-slate-700 hidden sm:block"></div>
-          <div>
-            <span class="text-sky-300 block text-[11px]">إجمالي التعاقد لليوم</span>
-            <strong id="dayTotalContractMoney" class="text-base sm:text-lg font-extrabold text-sky-400 tabular-nums">0.00</strong> <span class="text-xs text-slate-400">ج.م</span>
-          </div>
-          <div class="h-8 w-px bg-slate-700 hidden sm:block"></div>
-          <div class="bg-white/10 px-3.5 py-1.5 rounded-xl border border-white/15">
-            <span class="text-amber-200 block text-[11px]">الإجمالي الكلي لليوم</span>
-            <strong id="dayTotalGrossMoney" class="text-lg sm:text-xl font-extrabold text-amber-300 tabular-nums">0.00</strong> <span class="text-xs text-amber-100">ج.م</span>
-          </div>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2.5">
-          <button type="button" onclick="resetCurrentDayForm()" class="px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs sm:text-sm font-bold transition cursor-pointer">
-            تصفير عدادات اليوم
-          </button>
-          <button type="button" id="cancelEditBtn" onclick="cancelEditMode()" class="hidden px-4 py-2.5 rounded-xl bg-rose-600/25 hover:bg-rose-600/40 border border-rose-400/40 text-rose-200 text-xs sm:text-sm font-bold transition cursor-pointer">
-            إلغاء التعديل
-          </button>
-          <button type="button" id="saveClinicDayBtn" onclick="saveClinicDayToMonth()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-extrabold shadow-lg shadow-emerald-950/50 transition flex items-center gap-2 cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            <span id="saveClinicDayBtnText">إضافة العيادة إلى إجمالي الشهر</span>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- =================================================================== -->
-    <!-- SECTION B: MONTHLY AGGREGATE & BANK RECONCILIATION                  -->
-    <!-- =================================================================== -->
-    <section aria-label="إجمالي الشهر والمطابقة البنكية" class="space-y-4">
-      <!-- Active Month Header Bar -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 print-card">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-700 border border-teal-200 flex items-center justify-center shrink-0">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <div>
-            <h2 class="text-base sm:text-lg font-extrabold text-slate-900">ملخص ومطابقة الشهر المحاسبي: <span id="activeMonthArabicTitle" class="text-teal-700">نوفمبر 2026</span></h2>
-            <p class="text-xs text-slate-500">تجميع تلقائي لجميع أيام العيادات والمرور الداخلي المسجلة خلال الشهر</p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2 no-print">
-          <label for="activeMonthInput" class="text-xs font-bold text-slate-600 whitespace-nowrap">اختر الشهر للمراجعة:</label>
-          <input
-            type="month"
-            id="activeMonthInput"
-            value="2026-11"
-            onchange="handleActiveMonthChange()"
-            class="px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-600 tabular-nums cursor-pointer"
-          />
-        </div>
-      </div>
-
-      <!-- 4 KPI Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- KPI 1: Gross Entitlements -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs print-card flex flex-col justify-between">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-500">إجمالي الاستحقاقات قبل الاستقطاع</span>
-            <span class="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-extrabold tabular-nums">
-              <span id="kpiDaysCount">0</span> عيادة • <span id="kpiTotalCases">0</span> حالة
-            </span>
-          </div>
-          <div class="mt-3">
-            <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 tabular-nums">
-              <span id="kpiGross">0.00</span> <span class="text-sm font-semibold text-slate-500">ج.م</span>
-            </div>
-            <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-bold tabular-nums">
-              <span class="text-emerald-700">نقدي: <strong id="kpiCashGross">0</strong> ج</span>
-              <span class="text-blue-700">تعاقد: <strong id="kpiContractGross">0</strong> ج</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- KPI 2: Deductions -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs print-card flex flex-col justify-between">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-500">إجمالي الاستقطاعات</span>
-            <button type="button" onclick="openSettingsModal()" class="text-[11px] font-bold text-teal-700 hover:underline no-print cursor-pointer">تعديل النسبة</button>
-          </div>
-          <div class="mt-3">
-            <div class="text-2xl sm:text-3xl font-extrabold text-amber-600 tabular-nums">
-              -<span id="kpiDeductions">0.00</span> <span class="text-sm font-semibold text-slate-500">ج.م</span>
-            </div>
-            <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600 tabular-nums">
-              <span>دمغة (<strong id="kpiTaxRateDisp">0.75%</strong>): <strong id="kpiTaxAmount" class="text-slate-800">0.00</strong> ج</span>
-              <span>تحويل بنكي: <strong id="kpiBankFeeDisp">16</strong> ج</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- KPI 3: Expected Net Salary -->
-        <div class="bg-gradient-to-br from-teal-800 to-emerald-800 text-white rounded-2xl p-5 shadow-sm print-card flex flex-col justify-between">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-teal-100">صافي المرتب المتوقع في البنك</span>
-            <span class="w-8 h-8 rounded-xl bg-white/15 flex items-center justify-center">
-              <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </span>
-          </div>
-          <div class="mt-3">
-            <div class="text-2xl sm:text-3xl font-extrabold tabular-nums">
-              <span id="kpiNet">0.00</span> <span class="text-sm font-semibold text-emerald-200">ج.م</span>
-            </div>
-            <div class="mt-2.5 pt-2 border-t border-white/20 text-[11px] text-teal-100 flex items-center justify-between tabular-nums">
-              <span>متوسط العيادة: <strong id="kpiAvgPerClinic" class="text-white">0</strong> ج.م</span>
-              <span>حالات نقدي: <strong id="kpiCashCases">0</strong> | تعاقد: <strong id="kpiContractCases">0</strong></span>
-            </div>
-          </div>
-        </div>
-
-        <!-- KPI 4: Bank Deposit Reconciliation -->
-        <div class="bg-slate-900 text-white rounded-2xl p-5 shadow-sm print-card flex flex-col justify-between">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-300">المطابقة مع الشيك الفعلي المنصرف</span>
-            <span class="text-[11px] text-amber-300 font-bold">مراجعة البنك</span>
-          </div>
-          <div class="mt-2.5">
-            <div class="flex items-center justify-between gap-2">
-              <label for="actualBankDepositInput" class="text-xs text-slate-300 font-semibold whitespace-nowrap">المنصرف الفعلي:</label>
-              <input
-                type="number"
-                step="0.01"
-                id="actualBankDepositInput"
-                placeholder="أدخل المبلغ..."
-                oninput="handleActualBankDepositChange()"
-                class="w-32 px-2.5 py-1.5 rounded-xl bg-white/15 border border-white/25 text-white placeholder-slate-400 text-left text-sm font-extrabold focus:outline-none focus:ring-2 focus:ring-emerald-400 tabular-nums"
-              />
-            </div>
-            <div id="bankVarianceBadge" class="mt-2.5 text-xs font-extrabold px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 text-center tabular-nums">
-              أدخل قيمة الشيك المنصرف للمطابقة
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- =================================================================== -->
-    <!-- SECTION C: CLINIC DAYS LOG FOR THE ACTIVE MONTH                     -->
-    <!-- =================================================================== -->
-    <section class="bg-white rounded-2xl border border-slate-200 shadow-2xs print-card overflow-hidden">
-      <div class="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div>
-          <h3 class="text-base font-extrabold text-slate-800">سجل أيام العيادة المسجلة للشهر (<span id="logMonthTitle" class="text-teal-700">نوفمبر 2026</span>)</h3>
-          <p class="text-xs text-slate-500">مرتبة زمنياً بالتاريخ — يمكنك تعديل أي يوم عيادة أو حذفه في أي وقت</p>
-        </div>
-        <button type="button" onclick="promptClearActiveMonthDays()" class="px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition self-start sm:self-auto no-print cursor-pointer">
-          حذف جميع أيام هذا الشهر
-        </button>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full text-right border-collapse">
-          <thead>
-            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-extrabold text-slate-600">
-              <th class="py-3 px-3.5 whitespace-nowrap">التاريخ</th>
-              <th class="py-3 px-3.5">البيان / الملاحظة</th>
-              <th class="py-3 px-3.5 text-center">الكشوفات والمرور الداخلي</th>
-              <th class="py-3 px-3.5 text-center">رسم العصب والعضلات و TMS</th>
-              <th class="py-3 px-3.5 text-center">رسم المخ (شامل ٣ ساعات)</th>
-              <th class="py-3 px-3.5 text-left text-emerald-700">إجمالي النقدي</th>
-              <th class="py-3 px-3.5 text-left text-blue-700">إجمالي التعاقد</th>
-              <th class="py-3 px-3.5 text-left">الإجمالي الكلي</th>
-              <th class="py-3 px-3.5 text-center no-print">إجراءات</th>
-            </tr>
-          </thead>
-          <tbody id="clinicDaysTableBody" class="divide-y divide-slate-100 text-xs sm:text-sm">
-            <!-- Populated dynamically -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- =================================================================== -->
-    <!-- SECTION D: DETAILED MONTHLY CATEGORY BREAKDOWN TABLE                -->
-    <!-- =================================================================== -->
-    <section class="bg-white rounded-2xl border border-slate-200 shadow-2xs print-card overflow-hidden">
-      <div class="px-5 py-4 border-b border-slate-100">
-        <h3 class="text-base font-extrabold text-slate-800">تفصيل إجمالي الشهر حسب نوع الخدمة الطبية</h3>
-        <p class="text-xs text-slate-500">تجميع أعداد الحالات والمبالغ لكل خدمة طبية عبر جميع أيام العيادات المسجلة في الشهر</p>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-right border-collapse">
-          <thead>
-            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-extrabold text-slate-600">
-              <th class="py-3 px-4">القسم</th>
-              <th class="py-3 px-4">الخدمة الطبية</th>
-              <th class="py-3 px-4 text-center text-emerald-700">عدد النقدي</th>
-              <th class="py-3 px-4 text-left text-emerald-700">قيمة النقدي (ج.م)</th>
-              <th class="py-3 px-4 text-center text-blue-700">عدد التعاقد</th>
-              <th class="py-3 px-4 text-left text-blue-700">قيمة التعاقد (ج.م)</th>
-              <th class="py-3 px-4 text-center">إجمالي العدد</th>
-              <th class="py-3 px-4 text-left">الإجمالي الكلي (ج.م)</th>
-            </tr>
-          </thead>
-          <tbody id="categoryBreakdownBody" class="divide-y divide-slate-100 text-xs sm:text-sm">
-            <!-- Populated dynamically -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- =================================================================== -->
-    <!-- SECTION E: MULTI-MONTH HISTORY & COMPARISON TABLE                   -->
-    <!-- =================================================================== -->
-    <section class="bg-white rounded-2xl border border-slate-200 shadow-2xs print-card overflow-hidden">
-      <div class="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div>
-          <h3 class="text-base font-extrabold text-slate-800">سجل مقارنة الشهور المحفوظة</h3>
-          <p class="text-xs text-slate-500">مقارنة سريعة بين الشهور من حيث عدد العيادات والحالات وصافي المرتب المتوقع والمنصرف الفعلي</p>
-        </div>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-right border-collapse">
-          <thead>
-            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-extrabold text-slate-600">
-              <th class="py-3 px-4">الشهر</th>
-              <th class="py-3 px-4 text-center">عدد أيام العيادة</th>
-              <th class="py-3 px-4 text-center">إجمالي الحالات (نقدي / تعاقد)</th>
-              <th class="py-3 px-4 text-left">صافي المرتب المتوقع</th>
-              <th class="py-3 px-4 text-left">المنصرف الفعلي بالبنك</th>
-              <th class="py-3 px-4 text-left">الفارق (الزيادة / العجز)</th>
-              <th class="py-3 px-4 text-center no-print">فتح الشهر</th>
-            </tr>
-          </thead>
-          <tbody id="multiMonthHistoryBody" class="divide-y divide-slate-100 text-xs sm:text-sm">
-            <!-- Populated dynamically -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Footer -->
-  <footer class="bg-white border-t border-slate-200 py-4 mt-8 no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-      <p>يتم حفظ جميع أيام العيادات ولائحة الأسعار تلقائياً في ذاكرة متصفحك (<span class="font-bold text-teal-700">LocalStorage</span>).</p>
-      <p>حاسبة مستحقات الطبيب — تسجيل عيادة بعيادة</p>
-    </div>
-  </footer>
-
-  <!-- ===================================================================== -->
-  <!-- PRICE LIST SETTINGS MODAL                                             -->
-  <!-- ===================================================================== -->
-  <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 no-print">
-    <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
-      <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between shrink-0">
-        <div>
-          <h3 class="text-base sm:text-lg font-extrabold">لائحة أسعار المستشفى ونسب الاستقطاع</h3>
-          <p class="text-xs text-slate-300">عدّل أي سعر للنقدي أو التعاقدات أو نسبة الاستقطاع وسيتم إعادة احتساب جميع الأيام والشهور فوراً</p>
-        </div>
-        <button type="button" onclick="closeSettingsModal()" class="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition cursor-pointer">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <div class="p-5 overflow-y-auto space-y-6 flex-1">
-        <!-- Deductions -->
-        <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-4">
-          <h4 class="text-sm font-extrabold text-amber-900 mb-3">الاستقطاعات الضريبية ومصاريف التحويل</h4>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label for="cfg_taxRate" class="block text-xs font-bold text-slate-700 mb-1">نسبة استقطاع الدمغة / الضريبة (%)</label>
-              <input type="number" step="0.01" id="cfg_taxRate" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-sm font-extrabold tabular-nums focus:outline-none focus:ring-2 focus:ring-teal-600" />
-            </div>
-            <div>
-              <label for="cfg_bankFee" class="block text-xs font-bold text-slate-700 mb-1">مصاريف التحويل البنكي الثابتة (ج.م)</label>
-              <input type="number" step="0.01" id="cfg_bankFee" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-sm font-extrabold tabular-nums focus:outline-none focus:ring-2 focus:ring-teal-600" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Services Price Matrix -->
-        <div id="settingsPriceMatrix" class="space-y-5"></div>
-      </div>
-
-      <div class="bg-slate-50 px-5 py-3.5 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 shrink-0">
-        <button type="button" onclick="promptRestoreDefaultPrices()" class="px-3.5 py-2 rounded-xl border border-slate-300 hover:bg-slate-200/70 text-slate-700 text-xs font-bold transition cursor-pointer">
-          استعادة الأسعار الافتراضية
-        </button>
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="closeSettingsModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-bold transition cursor-pointer">
-            إلغاء
-          </button>
-          <button type="button" onclick="saveSettingsModal()" class="px-5 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold shadow-sm transition cursor-pointer">
-            حفظ الأسعار وتطبيقها
-          </button>
-        </div>
+      <div>
+        <button type="button" class="btn btn-outline" style="width:100%; justify-content:center;" onclick="clearCurrentMonth()">🗑️ تصفير سجلات الشهر</button>
       </div>
     </div>
   </div>
 
-  <!-- ===================================================================== -->
-  <!-- CUSTOM CONFIRMATION MODAL (NO native alert/confirm)                   -->
-  <!-- ===================================================================== -->
-  <div id="confirmModal" class="hidden fixed inset-0 z-50 bg-slate-900/55 backdrop-blur-xs flex items-center justify-center p-4 no-print">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
-      <div class="flex items-center gap-3 text-rose-600">
-        <div class="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
+  <!-- Monthly KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">إجمالي النقدي</div>
+      <div class="kpi-val" id="kpiCash" style="color:var(--cash);">0 ج.م</div>
+      <div class="kpi-sub" id="kpiCashCnt">0 حالة</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">إجمالي التعاقدات</div>
+      <div class="kpi-val" id="kpiCont" style="color:var(--cont);">0 ج.م</div>
+      <div class="kpi-sub" id="kpiContCnt">0 حالة</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">الاستقطاعات (0.75% + 16ج)</div>
+      <div class="kpi-val" id="kpiDed" style="color:var(--warn);">0 ج.م</div>
+      <div class="kpi-sub" id="kpiGross">الإجمالي: 0 ج.م</div>
+    </div>
+    <div class="kpi highlight">
+      <div class="kpi-label">صافي المرتب المتوقع بالبنك</div>
+      <div class="kpi-val" id="kpiNet">0 ج.م</div>
+      <div class="kpi-sub" id="kpiDays">0 سجل بالشهر</div>
+    </div>
+  </div>
+
+  <!-- Daily Clinic Entry Card -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title" id="entryModeTitle">➕ تسجيل شغل عيادة اليوم</h2>
+      <span class="card-total" id="draftTotal">إجمالي اليوم: 0 ج.م</span>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label class="field-label">تاريخ العيادة / المرور</label>
+        <input type="date" id="clinicDate">
+      </div>
+      <div>
+        <label class="field-label">وصف العيادة (اختياري)</label>
+        <input type="text" id="clinicNote" placeholder="مثال: عيادة الثلاثاء / مرور داخلي">
+      </div>
+    </div>
+
+    <!-- 1. كشف العيادة -->
+    <div class="sec-banner">
+      <span>١- كشف العيادة</span>
+      <span id="sec1Sub" style="font-size:0.78rem; color:var(--accent);">0 ج.م</span>
+    </div>
+    <div class="consult-grid" id="secConsults">
+      <div class="mini-box cash">
+      <div class="mini-title">١- نقدي مصري</div>
+      <div class="mini-price" id="pr_c_cash_eg">سعر الحالة: 300 ج.م</div>
+      <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('c_cash_eg',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_c_cash_eg" value="0" onchange="setKey('c_cash_eg', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('c_cash_eg',1)">+</button>
+    </div>
+    </div>
+<div class="mini-box cash">
+      <div class="mini-title">٢- نقدي أجنبي</div>
+      <div class="mini-price" id="pr_c_cash_for">سعر الحالة: 300 ج.م</div>
+      <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('c_cash_for',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_c_cash_for" value="0" onchange="setKey('c_cash_for', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('c_cash_for',1)">+</button>
+    </div>
+    </div>
+<div class="mini-box cont">
+      <div class="mini-title">٣- تعاقد</div>
+      <div class="mini-price" id="pr_c_cont">سعر الحالة: 220 ج.م</div>
+      <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('c_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_c_cont" value="0" onchange="setKey('c_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('c_cont',1)">+</button>
+    </div>
+    </div>
+    </div>
+
+    <!-- 2. رسم العصب والعضلات -->
+    <div class="sec-banner">
+      <span>٢- رسم العصب والعضلات</span>
+      <span id="sec2Sub" style="font-size:0.78rem; color:var(--accent);">0 ج.م</span>
+    </div>
+
+    <div class="sec-sub-banner">أولاً: تفصيل مكونات رسم العصب (حركي / حسي / جذور / عضلات — بالوحدة)</div>
+    <div class="hint-note">💡 معادلة الطرف الواحد: ٢ عصب حركي + ٢ عصب حسي + ٢ جذور (٦ وحدات = 780 ج نقدي / 624 ج تعاقد) + ٢ عضلة (540 ج نقدي / 432 ج تعاقد).</div>
+    <div id="secNerveComponents">
+      <div class="comp-card g-cash">
+      <div class="comp-card-head">
+        <span>١- رسم عصب نقدي</span>
+        <span class="comp-badge" id="badge_nc_cash">0 وحدة</span>
+      </div>
+      <div class="comp-grid-4">
+        <div class="comp-item">
+          <div class="comp-item-name">عصب حركي</div>
+          <div class="comp-item-price" id="pr_nc_cash_motor">130 ج.م</div>
+          <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cash_motor',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_cash_motor" value="0" onchange="setKey('nc_cash_motor', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cash_motor',1)">+</button>
+    </div>
+        </div><div class="comp-item">
+          <div class="comp-item-name">عصب حسي</div>
+          <div class="comp-item-price" id="pr_nc_cash_sens">130 ج.م</div>
+          <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cash_sens',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_cash_sens" value="0" onchange="setKey('nc_cash_sens', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cash_sens',1)">+</button>
+    </div>
+        </div><div class="comp-item">
+          <div class="comp-item-name">جذور</div>
+          <div class="comp-item-price" id="pr_nc_cash_root">130 ج.م</div>
+          <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cash_root',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_cash_root" value="0" onchange="setKey('nc_cash_root', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cash_root',1)">+</button>
+    </div>
+        </div><div class="comp-item">
+          <div class="comp-item-name">عضلات (للوحدة)</div>
+          <div class="comp-item-price" id="pr_nc_cash_emg">270 ج.م</div>
+          <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cash_emg',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_cash_emg" value="0" onchange="setKey('nc_cash_emg', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cash_emg',1)">+</button>
+    </div>
         </div>
-        <h3 id="confirmModalTitle" class="text-base font-extrabold text-slate-800">تأكيد الإجراء</h3>
       </div>
-      <p id="confirmModalMessage" class="text-sm text-slate-600 leading-relaxed"></p>
-      <div class="flex justify-end gap-2 pt-2">
-        <button type="button" onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 text-sm font-semibold cursor-pointer">إلغاء</button>
-        <button type="button" id="confirmModalActionBtn" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold cursor-pointer">تأكيد</button>
+    </div>
+<div class="comp-card g-cash">
+      <div class="comp-card-head">
+        <span>٢- رسم عصب نقدي داخلي</span>
+        <span class="comp-badge" id="badge_nc_inpcash">0 وحدة</span>
       </div>
+      <div class="comp-grid-4">
+        <div class="comp-item">
+          <div class="comp-item-name">عصب حركي</div>
+          <div class="comp-item-price" id="pr_nc_inpcash_motor">260 ج.م</div>
+          <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcash_motor',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_inpcash_motor" value="0" onchange="setKey('nc_inpcash_motor', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcash_motor',1)">+</button>
+    </div>
+        </div><div class="comp-item">
+          <div class="comp-item-name">عصب حسي</div>
+          <div class="comp-item-price" id="pr_nc_inpcash_sens">260 ج.م</div>
+          <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcash_sens',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_inpcash_sens" value="0" onchange="setKey('nc_inpcash_sens', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcash_sens',1)">+</button>
+    </div>
+        </div><div class="comp-item">
+          <div class="comp-item-name">جذور</div>
+          <div class="comp-item-price" id="pr_nc_inpcash_root">260 ج.م</div>
+          <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcash_root',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_inpcash_root" value="0" onchange="setKey('nc_inpcash_root', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcash_root',1)">+</button>
+    </div>
+        </div><div class="comp-item">
+          <div class="comp-item-name">عضلات (للوحدة)</div>
+          <div class="comp-item-price" id="pr_nc_inpcash_emg">540 ج.م</div>
+          <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcash_emg',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_inpcash_emg" value="0" onchange="setKey('nc_inpcash_emg', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcash_emg',1)">+</button>
+    </div>
+        </div>
+      </div>
+    </div>
+<div class="comp-card g-cash">
+      <div class="comp-card-head">
+        <span>٣- رسم عصب نقدي أجنبي</span>
+        <span class="comp-badge" id="badge_nc_forcash">0 وحدة</span>
+      </div>
+      <div class="comp-grid-4">
+        <div class="comp-item">
+          <div class="comp-item-name">عصب حركي</div>
+          <div class="comp-item-price" id="pr_nc_forcash_motor">130 ج.م</div>
+          <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('nc_forcash_motor',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_forcash_motor" value="0" onchange="setKey('nc_forcash_motor', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_forcash_motor',1)">+</button>
+    </div>
+        </div><div class="comp-item">
+          <div class="comp-item-name">عصب حسي</div>
+          <div class="comp-item-price" id="pr_nc_forcash_sens">130 ج.م</div>
+          <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('nc_forcash_sens',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_forcash_sens" value="0" onchange="setKey('nc_forcash_sens', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_forcash_sens',1)">+</button>
+    </div>
+        </div><div class="comp-item">
+          <div class="comp-item-name">جذور</div>
+          <div class="comp-item-price" id="pr_nc_forcash_root">130 ج.م</div>
+          <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('nc_forcash_root',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_forcash_root" value="0" onchange="setKey('nc_forcash_root', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_forcash_root',1)">+</button>
+    </div>
+        </div><div class="comp-item">
+          <div class="comp-item-name">عضلات (للوحدة)</div>
+          <div class="comp-item-price" id="pr_nc_forcash_emg">270 ج.م</div>
+          <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('nc_forcash_emg',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_forcash_emg" value="0" onchange="setKey('nc_forcash_emg', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_forcash_emg',1)">+</button>
+    </div>
+        </div>
+      </div>
+    </div>
+<div class="comp-card g-cont">
+      <div class="comp-card-head">
+        <span>٤- رسم عصب تعاقد</span>
+        <span class="comp-badge" id="badge_nc_cont">0 وحدة</span>
+      </div>
+      <div class="comp-grid-4">
+        <div class="comp-item">
+          <div class="comp-item-name">عصب حركي</div>
+          <div class="comp-item-price" id="pr_nc_cont_motor">104 ج.م</div>
+          <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cont_motor',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_cont_motor" value="0" onchange="setKey('nc_cont_motor', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cont_motor',1)">+</button>
+    </div>
+        </div><div class="comp-item">
+          <div class="comp-item-name">عصب حسي</div>
+          <div class="comp-item-price" id="pr_nc_cont_sens">104 ج.م</div>
+          <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cont_sens',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_cont_sens" value="0" onchange="setKey('nc_cont_sens', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cont_sens',1)">+</button>
+    </div>
+        </div><div class="comp-item">
+          <div class="comp-item-name">جذور</div>
+          <div class="comp-item-price" id="pr_nc_cont_root">104 ج.م</div>
+          <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cont_root',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_cont_root" value="0" onchange="setKey('nc_cont_root', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cont_root',1)">+</button>
+    </div>
+        </div><div class="comp-item">
+          <div class="comp-item-name">عضلات (للوحدة)</div>
+          <div class="comp-item-price" id="pr_nc_cont_emg">216 ج.م</div>
+          <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cont_emg',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_cont_emg" value="0" onchange="setKey('nc_cont_emg', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_cont_emg',1)">+</button>
+    </div>
+        </div>
+      </div>
+    </div>
+<div class="comp-card g-cont">
+      <div class="comp-card-head">
+        <span>٥- رسم عصب داخلي تعاقد</span>
+        <span class="comp-badge" id="badge_nc_inpcont">0 وحدة</span>
+      </div>
+      <div class="comp-grid-4">
+        <div class="comp-item">
+          <div class="comp-item-name">عصب حركي</div>
+          <div class="comp-item-price" id="pr_nc_inpcont_motor">208 ج.م</div>
+          <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcont_motor',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_inpcont_motor" value="0" onchange="setKey('nc_inpcont_motor', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcont_motor',1)">+</button>
+    </div>
+        </div><div class="comp-item">
+          <div class="comp-item-name">عصب حسي</div>
+          <div class="comp-item-price" id="pr_nc_inpcont_sens">208 ج.م</div>
+          <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcont_sens',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_inpcont_sens" value="0" onchange="setKey('nc_inpcont_sens', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcont_sens',1)">+</button>
+    </div>
+        </div><div class="comp-item">
+          <div class="comp-item-name">جذور</div>
+          <div class="comp-item-price" id="pr_nc_inpcont_root">208 ج.م</div>
+          <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcont_root',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_inpcont_root" value="0" onchange="setKey('nc_inpcont_root', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcont_root',1)">+</button>
+    </div>
+        </div><div class="comp-item">
+          <div class="comp-item-name">عضلات (للوحدة)</div>
+          <div class="comp-item-price" id="pr_nc_inpcont_emg">432 ج.م</div>
+          <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcont_emg',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_nc_inpcont_emg" value="0" onchange="setKey('nc_inpcont_emg', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('nc_inpcont_emg',1)">+</button>
+    </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <div class="sec-sub-banner" style="margin-top:14px;">ثانياً: فحوصات رسم العصب والعضلات الكاملة (نقدي / تعاقد)</div>
+    <div class="col-headers">
+      <div>نوع الفحص</div>
+      <div class="h-cash">نقدي</div>
+      <div class="h-cont">تعاقد</div>
+    </div>
+    <div id="secNervePackages">
+      <div class="service-row">
+      <div>
+        <div class="svc-name">١- رسم عصب طرف واحد (٦ وحدات عصب)</div>
+        <div class="svc-prices" id="pr_pair_np_1">نقدي: 780 ج | تعاقد: 624 ج</div>
+      </div>
+      <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('np_1_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_1_cash" value="0" onchange="setKey('np_1_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_1_cash',1)">+</button>
+    </div>
+      <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('np_1_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_1_cont" value="0" onchange="setKey('np_1_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_1_cont',1)">+</button>
+    </div>
+    </div>
+<div class="service-row">
+      <div>
+        <div class="svc-name">٢- رسم عصب طرفين</div>
+        <div class="svc-prices" id="pr_pair_np_2">نقدي: 1560 ج | تعاقد: 1248 ج</div>
+      </div>
+      <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('np_2_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_2_cash" value="0" onchange="setKey('np_2_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_2_cash',1)">+</button>
+    </div>
+      <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('np_2_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_2_cont" value="0" onchange="setKey('np_2_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_2_cont',1)">+</button>
+    </div>
+    </div>
+<div class="service-row">
+      <div>
+        <div class="svc-name">٣- رسم عصب أربع أطراف</div>
+        <div class="svc-prices" id="pr_pair_np_4">نقدي: 3120 ج | تعاقد: 2496 ج</div>
+      </div>
+      <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('np_4_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_4_cash" value="0" onchange="setKey('np_4_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_4_cash',1)">+</button>
+    </div>
+      <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('np_4_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_4_cont" value="0" onchange="setKey('np_4_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_4_cont',1)">+</button>
+    </div>
+    </div>
+<div class="service-row">
+      <div>
+        <div class="svc-name">٤- رسم عصب وجه</div>
+        <div class="svc-prices" id="pr_pair_np_face">نقدي: 780 ج | تعاقد: 624 ج</div>
+      </div>
+      <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('np_face_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_face_cash" value="0" onchange="setKey('np_face_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_face_cash',1)">+</button>
+    </div>
+      <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('np_face_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_face_cont" value="0" onchange="setKey('np_face_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_face_cont',1)">+</button>
+    </div>
+    </div>
+<div class="service-row">
+      <div>
+        <div class="svc-name">٥- رسم عصب طرف واحد وعضلات</div>
+        <div class="svc-prices" id="pr_pair_np_1emg">نقدي: 1320 ج | تعاقد: 1056 ج</div>
+      </div>
+      <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('np_1emg_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_1emg_cash" value="0" onchange="setKey('np_1emg_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_1emg_cash',1)">+</button>
+    </div>
+      <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('np_1emg_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_1emg_cont" value="0" onchange="setKey('np_1emg_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_1emg_cont',1)">+</button>
+    </div>
+    </div>
+<div class="service-row">
+      <div>
+        <div class="svc-name">٦- رسم عصب طرفين وعضلات</div>
+        <div class="svc-prices" id="pr_pair_np_2emg">نقدي: 2100 ج | تعاقد: 1680 ج</div>
+      </div>
+      <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('np_2emg_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_2emg_cash" value="0" onchange="setKey('np_2emg_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_2emg_cash',1)">+</button>
+    </div>
+      <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('np_2emg_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_2emg_cont" value="0" onchange="setKey('np_2emg_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_2emg_cont',1)">+</button>
+    </div>
+    </div>
+<div class="service-row">
+      <div>
+        <div class="svc-name">٧- رسم عصب ٤ أطراف وعضلات</div>
+        <div class="svc-prices" id="pr_pair_np_4emg">نقدي: 3660 ج | تعاقد: 2928 ج</div>
+      </div>
+      <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('np_4emg_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_4emg_cash" value="0" onchange="setKey('np_4emg_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_4emg_cash',1)">+</button>
+    </div>
+      <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('np_4emg_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_4emg_cont" value="0" onchange="setKey('np_4emg_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_4emg_cont',1)">+</button>
+    </div>
+    </div>
+<div class="service-row">
+      <div>
+        <div class="svc-name">٨- رسم عصب وجه وعضلات</div>
+        <div class="svc-prices" id="pr_pair_np_faceemg">نقدي: 1320 ج | تعاقد: 1056 ج</div>
+      </div>
+      <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('np_faceemg_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_faceemg_cash" value="0" onchange="setKey('np_faceemg_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_faceemg_cash',1)">+</button>
+    </div>
+      <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('np_faceemg_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_faceemg_cont" value="0" onchange="setKey('np_faceemg_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_faceemg_cont',1)">+</button>
+    </div>
+    </div>
+<div class="service-row">
+      <div>
+        <div class="svc-name">٩- رسم عصب ضفيرة عصبية وعضلات</div>
+        <div class="svc-prices" id="pr_pair_np_plex">نقدي: 1560 ج | تعاقد: 1248 ج</div>
+      </div>
+      <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('np_plex_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_plex_cash" value="0" onchange="setKey('np_plex_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_plex_cash',1)">+</button>
+    </div>
+      <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('np_plex_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_plex_cont" value="0" onchange="setKey('np_plex_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_plex_cont',1)">+</button>
+    </div>
+    </div>
+<div class="service-row">
+      <div>
+        <div class="svc-name">١٠- رسم عصب وهن عضلات</div>
+        <div class="svc-prices" id="pr_pair_np_mg">نقدي: 1560 ج | تعاقد: 1248 ج</div>
+      </div>
+      <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('np_mg_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_mg_cash" value="0" onchange="setKey('np_mg_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_mg_cash',1)">+</button>
+    </div>
+      <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('np_mg_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_mg_cont" value="0" onchange="setKey('np_mg_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_mg_cont',1)">+</button>
+    </div>
+    </div>
+<div class="service-row">
+      <div>
+        <div class="svc-name">فحص عصب / عضلات داخلي طرف واحد (2x)</div>
+        <div class="svc-prices" id="pr_pair_np_inp2x">نقدي: 1560 ج | تعاقد: 1248 ج</div>
+      </div>
+      <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('np_inp2x_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_inp2x_cash" value="0" onchange="setKey('np_inp2x_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_inp2x_cash',1)">+</button>
+    </div>
+      <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('np_inp2x_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_inp2x_cont" value="0" onchange="setKey('np_inp2x_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_inp2x_cont',1)">+</button>
+    </div>
+    </div>
+<div class="service-row">
+      <div>
+        <div class="svc-name">فحص ٤ أطراف عصب وعضلات داخلي (2x)</div>
+        <div class="svc-prices" id="pr_pair_np_4emg_inp2x">نقدي: 7320 ج | تعاقد: 5856 ج</div>
+      </div>
+      <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('np_4emg_inp2x_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_4emg_inp2x_cash" value="0" onchange="setKey('np_4emg_inp2x_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_4emg_inp2x_cash',1)">+</button>
+    </div>
+      <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('np_4emg_inp2x_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_np_4emg_inp2x_cont" value="0" onchange="setKey('np_4emg_inp2x_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('np_4emg_inp2x_cont',1)">+</button>
+    </div>
+    </div>
+    </div>
+
+    <!-- 3. رسم المخ -->
+    <div class="sec-banner">
+      <span>٣- رسم المخ بالكمبيوتر (EEG)</span>
+      <span id="sec3Sub" style="font-size:0.78rem; color:var(--accent);">0 ج.م</span>
+    </div>
+    <div id="secEEG">
+      <div class="multi-card">
+          <div class="multi-card-title">
+            <span>١- رسم مخ عادي</span>
+            <span class="row-sub-amt" id="rowamt_eeg_reg">0 ج.م</span>
+          </div>
+          <div class="grid-3"><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي</div>
+              <div class="sub-prc" id="pr_eeg_reg_cash">270 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_reg_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_reg_cash" value="0" onchange="setKey('eeg_reg_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_reg_cash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي أجنبي</div>
+              <div class="sub-prc" id="pr_eeg_reg_forcash">270 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_reg_forcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_reg_forcash" value="0" onchange="setKey('eeg_reg_forcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_reg_forcash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">داخلي نقدي</div>
+              <div class="sub-prc" id="pr_eeg_reg_inpcash">540 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_reg_inpcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_reg_inpcash" value="0" onchange="setKey('eeg_reg_inpcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_reg_inpcash',1)">+</button>
+    </div>
+            </div></div>
+          <div class="grid-2" style="margin-top:7px;"><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد</div>
+              <div class="sub-prc" id="pr_eeg_reg_cont">255 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_reg_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_reg_cont" value="0" onchange="setKey('eeg_reg_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_reg_cont',1)">+</button>
+    </div>
+            </div><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد داخلي</div>
+              <div class="sub-prc" id="pr_eeg_reg_inpcont">510 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_reg_inpcont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_reg_inpcont" value="0" onchange="setKey('eeg_reg_inpcont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_reg_inpcont',1)">+</button>
+    </div>
+            </div></div>
+        </div>
+<div class="multi-card">
+          <div class="multi-card-title">
+            <span>٢- رسم مخ ساعة</span>
+            <span class="row-sub-amt" id="rowamt_eeg_1h">0 ج.م</span>
+          </div>
+          <div class="grid-3"><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي</div>
+              <div class="sub-prc" id="pr_eeg_1h_cash">360 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_1h_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_1h_cash" value="0" onchange="setKey('eeg_1h_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_1h_cash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي أجنبي</div>
+              <div class="sub-prc" id="pr_eeg_1h_forcash">360 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_1h_forcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_1h_forcash" value="0" onchange="setKey('eeg_1h_forcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_1h_forcash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">داخلي نقدي</div>
+              <div class="sub-prc" id="pr_eeg_1h_inpcash">720 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_1h_inpcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_1h_inpcash" value="0" onchange="setKey('eeg_1h_inpcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_1h_inpcash',1)">+</button>
+    </div>
+            </div></div>
+          <div class="grid-2" style="margin-top:7px;"><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد</div>
+              <div class="sub-prc" id="pr_eeg_1h_cont">306 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_1h_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_1h_cont" value="0" onchange="setKey('eeg_1h_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_1h_cont',1)">+</button>
+    </div>
+            </div><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد داخلي</div>
+              <div class="sub-prc" id="pr_eeg_1h_inpcont">612 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_1h_inpcont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_1h_inpcont" value="0" onchange="setKey('eeg_1h_inpcont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_1h_inpcont',1)">+</button>
+    </div>
+            </div></div>
+        </div>
+<div class="multi-card">
+          <div class="multi-card-title">
+            <span>٣- رسم مخ ساعتين</span>
+            <span class="row-sub-amt" id="rowamt_eeg_2h">0 ج.م</span>
+          </div>
+          <div class="grid-3"><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي</div>
+              <div class="sub-prc" id="pr_eeg_2h_cash">480 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_2h_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_2h_cash" value="0" onchange="setKey('eeg_2h_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_2h_cash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي أجنبي</div>
+              <div class="sub-prc" id="pr_eeg_2h_forcash">480 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_2h_forcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_2h_forcash" value="0" onchange="setKey('eeg_2h_forcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_2h_forcash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">داخلي نقدي</div>
+              <div class="sub-prc" id="pr_eeg_2h_inpcash">960 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_2h_inpcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_2h_inpcash" value="0" onchange="setKey('eeg_2h_inpcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_2h_inpcash',1)">+</button>
+    </div>
+            </div></div>
+          <div class="grid-2" style="margin-top:7px;"><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد</div>
+              <div class="sub-prc" id="pr_eeg_2h_cont">408 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_2h_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_2h_cont" value="0" onchange="setKey('eeg_2h_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_2h_cont',1)">+</button>
+    </div>
+            </div><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد داخلي</div>
+              <div class="sub-prc" id="pr_eeg_2h_inpcont">816 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_2h_inpcont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_2h_inpcont" value="0" onchange="setKey('eeg_2h_inpcont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_2h_inpcont',1)">+</button>
+    </div>
+            </div></div>
+        </div>
+<div class="multi-card">
+          <div class="multi-card-title">
+            <span>٤- رسم مخ ٣ ساعات</span>
+            <span class="row-sub-amt" id="rowamt_eeg_3h">0 ج.م</span>
+          </div>
+          <div class="grid-3"><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي</div>
+              <div class="sub-prc" id="pr_eeg_3h_cash">720 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_3h_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_3h_cash" value="0" onchange="setKey('eeg_3h_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_3h_cash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي أجنبي</div>
+              <div class="sub-prc" id="pr_eeg_3h_forcash">720 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_3h_forcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_3h_forcash" value="0" onchange="setKey('eeg_3h_forcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_3h_forcash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">داخلي نقدي</div>
+              <div class="sub-prc" id="pr_eeg_3h_inpcash">1440 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_3h_inpcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_3h_inpcash" value="0" onchange="setKey('eeg_3h_inpcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_3h_inpcash',1)">+</button>
+    </div>
+            </div></div>
+          <div class="grid-2" style="margin-top:7px;"><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد</div>
+              <div class="sub-prc" id="pr_eeg_3h_cont">600 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_3h_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_3h_cont" value="0" onchange="setKey('eeg_3h_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_3h_cont',1)">+</button>
+    </div>
+            </div><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد داخلي</div>
+              <div class="sub-prc" id="pr_eeg_3h_inpcont">1200 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_3h_inpcont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_3h_inpcont" value="0" onchange="setKey('eeg_3h_inpcont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_3h_inpcont',1)">+</button>
+    </div>
+            </div></div>
+        </div>
+<div class="multi-card">
+          <div class="multi-card-title">
+            <span>٥- رسم مخ ٦ ساعات</span>
+            <span class="row-sub-amt" id="rowamt_eeg_6h">0 ج.م</span>
+          </div>
+          <div class="grid-3"><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي</div>
+              <div class="sub-prc" id="pr_eeg_6h_cash">840 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_6h_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_6h_cash" value="0" onchange="setKey('eeg_6h_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_6h_cash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي أجنبي</div>
+              <div class="sub-prc" id="pr_eeg_6h_forcash">840 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_6h_forcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_6h_forcash" value="0" onchange="setKey('eeg_6h_forcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_6h_forcash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">داخلي نقدي</div>
+              <div class="sub-prc" id="pr_eeg_6h_inpcash">1680 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_6h_inpcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_6h_inpcash" value="0" onchange="setKey('eeg_6h_inpcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_6h_inpcash',1)">+</button>
+    </div>
+            </div></div>
+          <div class="grid-2" style="margin-top:7px;"><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد</div>
+              <div class="sub-prc" id="pr_eeg_6h_cont">840 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_6h_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_6h_cont" value="0" onchange="setKey('eeg_6h_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_6h_cont',1)">+</button>
+    </div>
+            </div><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد داخلي</div>
+              <div class="sub-prc" id="pr_eeg_6h_inpcont">1680 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_6h_inpcont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_6h_inpcont" value="0" onchange="setKey('eeg_6h_inpcont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_6h_inpcont',1)">+</button>
+    </div>
+            </div></div>
+        </div>
+<div class="multi-card">
+          <div class="multi-card-title">
+            <span>٦- رسم مخ بالفيديو (٦–٨ ساعات)</span>
+            <span class="row-sub-amt" id="rowamt_eeg_vid">0 ج.م</span>
+          </div>
+          <div class="grid-3"><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي</div>
+              <div class="sub-prc" id="pr_eeg_vid_cash">1650 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_vid_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_vid_cash" value="0" onchange="setKey('eeg_vid_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_vid_cash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي أجنبي</div>
+              <div class="sub-prc" id="pr_eeg_vid_forcash">1650 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_vid_forcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_vid_forcash" value="0" onchange="setKey('eeg_vid_forcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_vid_forcash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">داخلي نقدي</div>
+              <div class="sub-prc" id="pr_eeg_vid_inpcash">3300 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_vid_inpcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_vid_inpcash" value="0" onchange="setKey('eeg_vid_inpcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_vid_inpcash',1)">+</button>
+    </div>
+            </div></div>
+          <div class="grid-2" style="margin-top:7px;"><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد</div>
+              <div class="sub-prc" id="pr_eeg_vid_cont">1320 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_vid_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_vid_cont" value="0" onchange="setKey('eeg_vid_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_vid_cont',1)">+</button>
+    </div>
+            </div><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد داخلي</div>
+              <div class="sub-prc" id="pr_eeg_vid_inpcont">2640 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_vid_inpcont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_eeg_vid_inpcont" value="0" onchange="setKey('eeg_vid_inpcont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('eeg_vid_inpcont',1)">+</button>
+    </div>
+            </div></div>
+        </div>
+    </div>
+
+    <!-- 4. جهاز التحفيز المغناطيسي -->
+    <div class="sec-banner">
+      <span>٤- جهاز التحفيز المغناطيسي (rTMS)</span>
+      <span id="sec4Sub" style="font-size:0.78rem; color:var(--accent);">0 ج.م</span>
+    </div>
+    <div id="secRTMS">
+      <div class="multi-card">
+          <div class="multi-card-title">
+            <span>جلسة جهاز التحفيز المغناطيسي (rTMS)</span>
+            <span class="row-sub-amt" id="rowamt_rtms">0 ج.م</span>
+          </div>
+          <div class="grid-3"><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي</div>
+              <div class="sub-prc" id="pr_rtms_cash">375 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('rtms_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_rtms_cash" value="0" onchange="setKey('rtms_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('rtms_cash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي أجنبي</div>
+              <div class="sub-prc" id="pr_rtms_forcash">375 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('rtms_forcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_rtms_forcash" value="0" onchange="setKey('rtms_forcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('rtms_forcash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">داخلي نقدي</div>
+              <div class="sub-prc" id="pr_rtms_inpcash">750 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('rtms_inpcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_rtms_inpcash" value="0" onchange="setKey('rtms_inpcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('rtms_inpcash',1)">+</button>
+    </div>
+            </div></div>
+          <div class="grid-2" style="margin-top:7px;"><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد</div>
+              <div class="sub-prc" id="pr_rtms_cont">162 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('rtms_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_rtms_cont" value="0" onchange="setKey('rtms_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('rtms_cont',1)">+</button>
+    </div>
+            </div><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد داخلي</div>
+              <div class="sub-prc" id="pr_rtms_inpcont">324 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('rtms_inpcont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_rtms_inpcont" value="0" onchange="setKey('rtms_inpcont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('rtms_inpcont',1)">+</button>
+    </div>
+            </div></div>
+        </div>
+    </div>
+
+    <!-- 5. مرور حالات داخلي -->
+    <div class="sec-banner">
+      <span>٥- مرور حالات داخلي</span>
+      <span id="sec5Sub" style="font-size:0.78rem; color:var(--accent);">0 ج.م</span>
+    </div>
+    <div id="secInpatient">
+      <div class="multi-card">
+          <div class="multi-card-title">
+            <span>مرور حالات داخلي</span>
+            <span class="row-sub-amt" id="rowamt_inp">0 ج.م</span>
+          </div>
+          <div class="grid-3"><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي</div>
+              <div class="sub-prc" id="pr_inp_cash">300 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('inp_cash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_inp_cash" value="0" onchange="setKey('inp_cash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('inp_cash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">نقدي أجنبي</div>
+              <div class="sub-prc" id="pr_inp_forcash">300 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('inp_forcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_inp_forcash" value="0" onchange="setKey('inp_forcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('inp_forcash',1)">+</button>
+    </div>
+            </div><div class="sub-cell cash">
+              <div class="sub-lbl">داخلي نقدي</div>
+              <div class="sub-prc" id="pr_inp_inpcash">300 ج.م</div>
+              <div class="counter-box cash">
+      <button type="button" class="c-btn" onclick="stepKey('inp_inpcash',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_inp_inpcash" value="0" onchange="setKey('inp_inpcash', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('inp_inpcash',1)">+</button>
+    </div>
+            </div></div>
+          <div class="grid-2" style="margin-top:7px;"><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد</div>
+              <div class="sub-prc" id="pr_inp_cont">220 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('inp_cont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_inp_cont" value="0" onchange="setKey('inp_cont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('inp_cont',1)">+</button>
+    </div>
+            </div><div class="sub-cell cont">
+              <div class="sub-lbl">تعاقد داخلي</div>
+              <div class="sub-prc" id="pr_inp_inpcont">220 ج.م</div>
+              <div class="counter-box cont">
+      <button type="button" class="c-btn" onclick="stepKey('inp_inpcont',-1)">−</button>
+      <input type="number" min="0" inputmode="numeric" class="c-input" id="val_inp_inpcont" value="0" onchange="setKey('inp_inpcont', this.value)">
+      <button type="button" class="c-btn" onclick="stepKey('inp_inpcont',1)">+</button>
+    </div>
+            </div></div>
+        </div>
+    </div>
+
+    <div style="margin-top:16px; display:flex; gap:8px;">
+      <button type="button" class="btn btn-success" id="saveClinicBtn" onclick="saveClinicEntry()">✅ إضافة العيادة إلى إجمالي الشهر</button>
+      <button type="button" class="btn btn-outline" id="cancelEditBtn" style="display:none;" onclick="cancelEdit()">إلغاء</button>
     </div>
   </div>
 
-  <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-5 left-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none no-print">
-    <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg border border-slate-700 flex items-center gap-2.5 text-sm font-bold">
-      <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-      <span id="toastMessage">تم الحفظ بنجاح</span>
+  <!-- Monthly Clinic Log -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">📅 سجل أيام العيادات المسجلة بالشهر</h2>
+      <span class="card-total" id="monthRowCount">0 سجل</span>
     </div>
-  </div>
-
-  <script>
-    // =========================================================================
-    // 1. UNIFIED SERVICE CATALOG (CASH & CONTRACT PAIRINGS)
-    // =========================================================================
-    const SERVICE_CATALOG = [
-      // Card 1: Consultations & Inpatient Rounds
-      {
-        key: 'consult_outpatient',
-        section: 'consult',
-        sectionName: 'الكشوفات والمرور الداخلي',
-        label: 'كشف عيادة خارجية',
-        cashPrice: 300,
-        contractPrice: 220,
-        isNew: false
-      },
-      {
-        key: 'inpatient_rounds',
-        section: 'consult',
-        sectionName: 'الكشوفات والمرور الداخلي',
-        label: 'مرور على حالات الداخلي (Inpatient Rounds)',
-        cashPrice: 300,
-        contractPrice: 220,
-        isNew: false
-      },
-
-      // Card 2: NCS / EMG / Inpatient 2x / rTMS
-      {
-        key: 'ncs_1',
-        section: 'ncs',
-        sectionName: 'رسم العصب والعضلات و rTMS',
-        label: 'رسم عصب طرف واحد (One Limb)',
-        cashPrice: 780,
-        contractPrice: 624,
-        isNew: false
-      },
-      {
-        key: 'ncs_2',
-        section: 'ncs',
-        sectionName: 'رسم العصب والعضلات و rTMS',
-        label: 'رسم عصب طرفين (Two Limbs)',
-        cashPrice: 1560,
-        contractPrice: 1248,
-        isNew: false
-      },
-      {
-        key: 'ncs_4',
-        section: 'ncs',
-        sectionName: 'رسم العصب والعضلات و rTMS',
-        label: 'رسم عصب ٤ أطراف (Four Limbs)',
-        cashPrice: 3120,
-        contractPrice: 2496,
-        isNew: false
-      },
-      {
-        key: 'emg',
-        section: 'ncs',
-        sectionName: 'رسم العصب والعضلات و rTMS',
-        label: 'رسم عضلات (EMG)',
-        cashPrice: 540,
-        contractPrice: 432,
-        isNew: false
-      },
-      {
-        key: 'ncs_inpatient_2x',
-        section: 'ncs',
-        sectionName: 'رسم العصب والعضلات و rTMS',
-        label: 'فحص عصب / عضلات داخلي (Inpatient 2x)',
-        cashPrice: 1560,
-        contractPrice: 1248,
-        isNew: false
-      },
-      {
-        key: 'rtms',
-        section: 'ncs',
-        sectionName: 'رسم العصب والعضلات و rTMS',
-        label: 'جلسات تحفيز مغناطيسي (rTMS)',
-        cashPrice: 300,
-        contractPrice: 162,
-        isNew: false
-      },
-
-      // Card 3: EEG (including 3-Hour EEG)
-      {
-        key: 'eeg_reg',
-        section: 'eeg',
-        sectionName: 'رسم المخ بالكمبيوتر (EEG)',
-        label: 'رسم مخ عادي (30 دقيقة)',
-        cashPrice: 270,
-        contractPrice: 255,
-        isNew: false
-      },
-      {
-        key: 'eeg_1h',
-        section: 'eeg',
-        sectionName: 'رسم المخ بالكمبيوتر (EEG)',
-        label: 'رسم مخ مطوّل ١ ساعة (EEG 1 Hour)',
-        cashPrice: 360,
-        contractPrice: 306,
-        isNew: false
-      },
-      {
-        key: 'eeg_2h',
-        section: 'eeg',
-        sectionName: 'رسم المخ بالكمبيوتر (EEG)',
-        label: 'رسم مخ مطوّل ٢ ساعتين (EEG 2 Hours)',
-        cashPrice: 480,
-        contractPrice: 408,
-        isNew: false
-      },
-      {
-        key: 'eeg_3h',
-        section: 'eeg',
-        sectionName: 'رسم المخ بالكمبيوتر (EEG)',
-        label: 'رسم مخ مطوّل ٣ ساعات (EEG 3 Hours)',
-        cashPrice: 600,
-        contractPrice: 510,
-        isNew: true
-      },
-      {
-        key: 'eeg_6h',
-        section: 'eeg',
-        sectionName: 'رسم المخ بالكمبيوتر (EEG)',
-        label: 'رسم مخ مطوّل ٦ ساعات (EEG6)',
-        cashPrice: 840,
-        contractPrice: 840,
-        isNew: false
-      },
-      {
-        key: 'eeg_video',
-        section: 'eeg',
-        sectionName: 'رسم المخ بالكمبيوتر (EEG)',
-        label: 'رسم مخ بالفيديو ٦–٨ ساعات (Video EEG)',
-        cashPrice: 1650,
-        contractPrice: 1650,
-        isNew: false
-      }
-    ];
-
-    const ARABIC_MONTHS = {
-      '01': 'يناير', '02': 'فبراير', '03': 'مارس', '04': 'أبريل',
-      '05': 'مايو', '06': 'يونيو', '07': 'يوليو', '08': 'أغسطس',
-      '09': 'سبتمبر', '10': 'أكتوبر', '11': 'نوفمبر', '12': 'ديسمبر'
-    };
-
-    const ARABIC_WEEKDAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-
-    // Realistic Sample Clinic Presets (October 2026 & September 2026)
-    const SAMPLE_MONTHS = {
-      '2026-10': {
-        actualBank: 34370,
-        days: [
-          {
-            date: '2026-10-03',
-            note: 'عيادة السبت',
-            cash: { consult_outpatient: 1, ncs_1: 1 },
-            contract: { consult_outpatient: 4, ncs_1: 1, ncs_2: 1 }
-          },
-          {
-            date: '2026-10-05',
-            note: 'عيادة الاثنين (كشوفات أجنبي ورسم عصب)',
-            cash: { consult_outpatient: 2, ncs_2: 1 },
-            contract: { consult_outpatient: 4, ncs_2: 1 }
-          },
-          {
-            date: '2026-10-06',
-            note: 'عيادة الثلاثاء',
-            cash: {},
-            contract: { consult_outpatient: 8, ncs_1: 1, rtms: 1, eeg_2h: 1 }
-          },
-          {
-            date: '2026-10-12',
-            note: 'عيادة منتصف الشهر (12–13 أكتوبر)',
-            cash: { consult_outpatient: 2, ncs_1: 2, eeg_1h: 1, eeg_2h: 1 },
-            contract: { consult_outpatient: 11, ncs_1: 2, rtms: 1, eeg_reg: 1, eeg_2h: 1 }
-          },
-          {
-            date: '2026-10-24',
-            note: 'مرور الداخلي وفحوصات الأقسام الداخلية',
-            cash: { inpatient_rounds: 2, ncs_inpatient_2x: 4, emg: 1 },
-            contract: { eeg_3h: 1 }
-          },
-          {
-            date: '2026-10-27',
-            note: 'عيادة الثلاثاء (نهاية الشهر)',
-            cash: { consult_outpatient: 1 },
-            contract: { consult_outpatient: 12 }
-          },
-          {
-            date: '2026-10-31',
-            note: 'عيادة السبت (ختام الشهر)',
-            cash: { consult_outpatient: 2 },
-            contract: { consult_outpatient: 11, ncs_1: 2, eeg_reg: 1 }
-          }
-        ]
-      },
-      '2026-09': {
-        actualBank: 48200,
-        days: [
-          {
-            date: '2026-09-05',
-            note: 'عيادة السبت (بداية الشهر)',
-            cash: {},
-            contract: { consult_outpatient: 5, ncs_2: 1, emg: 1 }
-          },
-          {
-            date: '2026-09-12',
-            note: 'عيادة السبت ورسم مخ 6 ساعات',
-            cash: { consult_outpatient: 2, eeg_6h: 1 },
-            contract: { consult_outpatient: 4, eeg_reg: 1 }
-          },
-          {
-            date: '2026-09-15',
-            note: 'عيادة الثلاثاء وفحوصات عصب',
-            cash: { consult_outpatient: 2, ncs_2: 1, eeg_2h: 1 },
-            contract: { consult_outpatient: 6, eeg_reg: 1 }
-          },
-          {
-            date: '2026-09-19',
-            note: 'عيادة السبت وجلسات rTMS',
-            cash: { consult_outpatient: 2 },
-            contract: { consult_outpatient: 7, ncs_2: 2, emg: 1, rtms: 2, eeg_1h: 1 }
-          },
-          {
-            date: '2026-09-26',
-            note: 'عيادة السبت ومرور الداخلي',
-            cash: { consult_outpatient: 2, inpatient_rounds: 1, ncs_2: 1, emg: 1, eeg_video: 1 },
-            contract: { consult_outpatient: 11, ncs_1: 2, ncs_inpatient_2x: 3, eeg_6h: 1 }
-          },
-          {
-            date: '2026-09-28',
-            note: 'عيادة الاثنين والختام الشهري',
-            cash: { consult_outpatient: 2, ncs_1: 1, eeg_1h: 1, eeg_2h: 2 },
-            contract: { consult_outpatient: 9, ncs_1: 1, eeg_1h: 2, eeg_2h: 3 }
-          }
-        ]
-      }
-    };
-
-    const STORAGE_PRICES_KEY = 'neuro_clinic_tracker_prices_v3';
-    const STORAGE_LEDGER_KEY = 'neuro_clinic_tracker_ledger_v3';
-
-    // =========================================================================
-    // 2. APPLICATION STATE
-    // =========================================================================
-    let priceConfig = loadPriceConfig();
-    let ledgerData = loadLedgerData(); // { 'YYYY-MM': { days: [ { date, note, cash: {}, contract: {} } ], actualBank: '' } }
-    let currentDraft = { cash: {}, contract: {} };
-    let editingOriginalDate = null; // null if creating new, or 'YYYY-MM-DD' if editing existing
-    let pendingConfirmCallback = null;
-
-    function getDefaultPriceConfig() {
-      const cash = {};
-      const contract = {};
-      SERVICE_CATALOG.forEach(item => {
-        cash[item.key] = item.cashPrice;
-        contract[item.key] = item.contractPrice;
-      });
-      return {
-        taxRate: 0.75,
-        bankFee: 16,
-        cash,
-        contract
-      };
-    }
-
-    function loadPriceConfig() {
-      const def = getDefaultPriceConfig();
-      try {
-        const raw = localStorage.getItem(STORAGE_PRICES_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          return {
-            taxRate: parsed.taxRate ?? def.taxRate,
-            bankFee: parsed.bankFee ?? def.bankFee,
-            cash: { ...def.cash, ...(parsed.cash || {}) },
-            contract: { ...def.contract, ...(parsed.contract || {}) }
-          };
-        }
-      } catch (e) {
-        console.error('Error loading prices:', e);
-      }
-      return def;
-    }
-
-    function savePriceConfig() {
-      try {
-        localStorage.setItem(STORAGE_PRICES_KEY, JSON.stringify(priceConfig));
-      } catch (e) {
-        showToast('تعذر حفظ لائحة الأسعار في المتصفح');
-      }
-    }
-
-    function loadLedgerData() {
-      try {
-        const raw = localStorage.getItem(STORAGE_LEDGER_KEY);
-        if (raw) return JSON.parse(raw) || {};
-      } catch (e) {
-        console.error('Error loading ledger:', e);
-      }
-      return {};
-    }
-
-    function saveLedgerData() {
-      try {
-        localStorage.setItem(STORAGE_LEDGER_KEY, JSON.stringify(ledgerData));
-      } catch (e) {
-        showToast('تعذر حفظ سجل العيادات في المتصفح');
-      }
-    }
-
-    function ensureMonthBucket(monthKey) {
-      if (!ledgerData[monthKey]) {
-        ledgerData[monthKey] = { days: [], actualBank: '' };
-      }
-      if (!Array.isArray(ledgerData[monthKey].days)) {
-        ledgerData[monthKey].days = [];
-      }
-      return ledgerData[monthKey];
-    }
-
-    // =========================================================================
-    // 3. CLINIC ENTRY FORM RENDERING & STEPPER LOGIC
-    // =========================================================================
-    function renderEntryFormCards() {
-      const containers = {
-        'consult-cash': document.getElementById('entry-consult-cash'),
-        'consult-contract': document.getElementById('entry-consult-contract'),
-        'ncs-cash': document.getElementById('entry-ncs-cash'),
-        'ncs-contract': document.getElementById('entry-ncs-contract'),
-        'eeg-cash': document.getElementById('entry-eeg-cash'),
-        'eeg-contract': document.getElementById('entry-eeg-contract')
-      };
-
-      Object.keys(containers).forEach(groupKey => {
-        const [sec, side] = groupKey.split('-');
-        const items = SERVICE_CATALOG.filter(i => i.section === sec);
-        const isCash = side === 'cash';
-        const btnStyle = isCash
-          ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border-emerald-300'
-          : 'bg-blue-100 hover:bg-blue-200 text-blue-900 border-blue-300';
-        const subTextColor = isCash ? 'text-emerald-800' : 'text-blue-800';
-
-        containers[groupKey].innerHTML = items.map(item => {
-          const count = Number(currentDraft[side][item.key]) || 0;
-          const unitPrice = Number(priceConfig[side][item.key]) || 0;
-          const sub = count * unitPrice;
-
-          return `
-            <div class="bg-white rounded-xl p-2.5 sm:p-3 border ${item.isNew ? 'border-amber-300 ring-1 ring-amber-200/70' : 'border-slate-200/90'} flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div class="flex-1 min-w-0">
-                <div class="flex flex-wrap items-center gap-1.5">
-                  <span class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">${escapeHtml(item.label)}</span>
-                  ${item.isNew ? '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-extrabold">جديد</span>' : ''}
-                </div>
-                <div class="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-slate-500 tabular-nums">
-                  <span>السعر: <strong class="text-slate-700">${unitPrice.toLocaleString('en-US')} ج.م</strong></span>
-                  <span>•</span>
-                  <span class="font-bold ${subTextColor}">المجموع: <strong id="draft_sub_${side}_${item.key}">${formatMoney(sub)}</strong> ج.م</span>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-1.5 self-end sm:self-center shrink-0">
-                <button type="button" onclick="stepDraftCount('${side}', '${item.key}', -1)" aria-label="إنقاص" class="w-8 h-8 rounded-lg border ${btnStyle} font-extrabold text-base flex items-center justify-center transition active:scale-95 cursor-pointer">−</button>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  id="draft_inp_${side}_${item.key}"
-                  value="${count}"
-                  oninput="setDraftCount('${side}', '${item.key}', this.value)"
-                  aria-label="${escapeHtml(item.label)}"
-                  class="counter-input w-14 h-8 text-center rounded-lg border border-slate-300 bg-slate-50 text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:bg-white tabular-nums"
-                />
-                <button type="button" onclick="stepDraftCount('${side}', '${item.key}', 1)" aria-label="زيادة" class="w-8 h-8 rounded-lg border ${btnStyle} font-extrabold text-base flex items-center justify-center transition active:scale-95 cursor-pointer">+</button>
-              </div>
-            </div>
-          `;
-        }).join('');
-      });
-
-      recalculateDraftDay();
-    }
-
-    function stepDraftCount(side, key, delta) {
-      const cur = Number(currentDraft[side][key]) || 0;
-      const next = Math.max(0, cur + delta);
-      currentDraft[side][key] = next;
-      const inp = document.getElementById(`draft_inp_${side}_${key}`);
-      if (inp) inp.value = next;
-      recalculateDraftDay();
-    }
-
-    function setDraftCount(side, key, rawVal) {
-      const val = Math.max(0, Math.floor(Number(rawVal) || 0));
-      currentDraft[side][key] = val;
-      recalculateDraftDay();
-    }
-
-    function computeDayMetrics(dayObj) {
-      const cashCounts = (dayObj && dayObj.cash) || {};
-      const contractCounts = (dayObj && dayObj.contract) || {};
-
-      let totalCases = 0, cashCases = 0, contractCases = 0;
-      let consultCases = 0, ncsCases = 0, eegCases = 0;
-      let consultCash = 0, consultContract = 0;
-      let ncsCash = 0, ncsContract = 0;
-      let eegCash = 0, eegContract = 0;
-
-      SERVICE_CATALOG.forEach(item => {
-        const cCnt = Number(cashCounts[item.key]) || 0;
-        const tCnt = Number(contractCounts[item.key]) || 0;
-        const cMoney = cCnt * (Number(priceConfig.cash[item.key]) || 0);
-        const tMoney = tCnt * (Number(priceConfig.contract[item.key]) || 0);
-
-        cashCases += cCnt;
-        contractCases += tCnt;
-        totalCases += (cCnt + tCnt);
-
-        if (item.section === 'consult') {
-          consultCases += (cCnt + tCnt);
-          consultCash += cMoney;
-          consultContract += tMoney;
-        } else if (item.section === 'ncs') {
-          ncsCases += (cCnt + tCnt);
-          ncsCash += cMoney;
-          ncsContract += tMoney;
-        } else if (item.section === 'eeg') {
-          eegCases += (cCnt + tCnt);
-          eegCash += cMoney;
-          eegContract += tMoney;
-        }
-      });
-
-      const cashGross = consultCash + ncsCash + eegCash;
-      const contractGross = consultContract + ncsContract + eegContract;
-      const gross = cashGross + contractGross;
-
-      return {
-        totalCases,
-        cashCases,
-        contractCases,
-        consultCases,
-        ncsCases,
-        eegCases,
-        consultCash,
-        consultContract,
-        consultTotal: consultCash + consultContract,
-        ncsCash,
-        ncsContract,
-        ncsTotal: ncsCash + ncsContract,
-        eegCash,
-        eegContract,
-        eegTotal: eegCash + eegContract,
-        cashGross,
-        contractGross,
-        gross
-      };
-    }
-
-    function recalculateDraftDay() {
-      SERVICE_CATALOG.forEach(item => {
-        ['cash', 'contract'].forEach(side => {
-          const cnt = Number(currentDraft[side][item.key]) || 0;
-          const unit = Number(priceConfig[side][item.key]) || 0;
-          const el = document.getElementById(`draft_sub_${side}_${item.key}`);
-          if (el) el.textContent = formatMoney(cnt * unit);
-        });
-      });
-
-      const m = computeDayMetrics(currentDraft);
-      document.getElementById('daySecConsult').textContent = formatMoney(m.consultTotal);
-      document.getElementById('dayConsultCashSub').textContent = formatMoney(m.consultCash);
-      document.getElementById('dayConsultContractSub').textContent = formatMoney(m.consultContract);
-
-      document.getElementById('daySecNcs').textContent = formatMoney(m.ncsTotal);
-      document.getElementById('dayNcsCashSub').textContent = formatMoney(m.ncsCash);
-      document.getElementById('dayNcsContractSub').textContent = formatMoney(m.ncsContract);
-
-      document.getElementById('daySecEeg').textContent = formatMoney(m.eegTotal);
-      document.getElementById('dayEegCashSub').textContent = formatMoney(m.eegCash);
-      document.getElementById('dayEegContractSub').textContent = formatMoney(m.eegContract);
-
-      document.getElementById('dayTotalCases').textContent = m.totalCases;
-      document.getElementById('dayTotalCashMoney').textContent = formatMoney(m.cashGross);
-      document.getElementById('dayTotalContractMoney').textContent = formatMoney(m.contractGross);
-      document.getElementById('dayTotalGrossMoney').textContent = formatMoney(m.gross);
-    }
-
-    function handleClinicDateChange() {
-      const dateStr = document.getElementById('clinicDateInput').value;
-      if (!dateStr) return;
-
-      // Update weekday label
-      document.getElementById('clinicDayNameBadge').textContent = getArabicWeekday(dateStr);
-
-      // Automatically switch active accounting month (YYYY-MM)
-      const monthKey = dateStr.slice(0, 7);
-      const activeMonthEl = document.getElementById('activeMonthInput');
-      if (activeMonthEl.value !== monthKey) {
-        activeMonthEl.value = monthKey;
-        renderMonthlyDashboard();
-      }
-
-      // Check if date already exists in that month
-      const bucket = ensureMonthBucket(monthKey);
-      const exists = bucket.days.some(d => d.date === dateStr);
-      const notice = document.getElementById('existingDateNotice');
-      if (exists && editingOriginalDate !== dateStr) {
-        notice.classList.remove('hidden');
-      } else {
-        notice.classList.add('hidden');
-      }
-    }
-
-    function loadExistingDateIntoForm() {
-      const dateStr = document.getElementById('clinicDateInput').value;
-      if (!dateStr) return;
-      editClinicDay(dateStr);
-    }
-
-    function saveClinicDayToMonth() {
-      const dateStr = document.getElementById('clinicDateInput').value;
-      if (!dateStr) {
-        showToast('يرجى اختيار تاريخ العيادة أولاً');
-        return;
-      }
-
-      const metrics = computeDayMetrics(currentDraft);
-      if (metrics.totalCases === 0) {
-        showToast('يرجى إدخال حالة واحدة على الأقل قبل إضافة العيادة');
-        return;
-      }
-
-      const note = document.getElementById('clinicNoteInput').value.trim();
-      const targetMonthKey = dateStr.slice(0, 7);
-
-      // If editing and date moved to another month, remove from old month
-      if (editingOriginalDate && editingOriginalDate.slice(0, 7) !== targetMonthKey) {
-        const oldBucket = ensureMonthBucket(editingOriginalDate.slice(0, 7));
-        oldBucket.days = oldBucket.days.filter(d => d.date !== editingOriginalDate);
-      }
-
-      const bucket = ensureMonthBucket(targetMonthKey);
-      const cleanCash = {};
-      const cleanContract = {};
-      SERVICE_CATALOG.forEach(item => {
-        const c = Number(currentDraft.cash[item.key]) || 0;
-        const t = Number(currentDraft.contract[item.key]) || 0;
-        if (c > 0) cleanCash[item.key] = c;
-        if (t > 0) cleanContract[item.key] = t;
-      });
-
-      const existingIdx = bucket.days.findIndex(d => d.date === dateStr);
-
-      if (editingOriginalDate) {
-        // Replace existing day record
-        if (editingOriginalDate !== dateStr) {
-          bucket.days = bucket.days.filter(d => d.date !== editingOriginalDate);
-        }
-        const idxAfter = bucket.days.findIndex(d => d.date === dateStr);
-        const newRecord = { date: dateStr, note, cash: cleanCash, contract: cleanContract };
-        if (idxAfter >= 0) bucket.days[idxAfter] = newRecord;
-        else bucket.days.push(newRecord);
-        showToast(`تم حفظ تعديلات عيادة ${dateStr}`);
-      } else if (existingIdx >= 0) {
-        // Merge counts into existing day if user logged another session on the same date
-        const prev = bucket.days[existingIdx];
-        SERVICE_CATALOG.forEach(item => {
-          const prevC = Number(prev.cash[item.key]) || 0;
-          const addC = Number(cleanCash[item.key]) || 0;
-          if (prevC + addC > 0) prev.cash[item.key] = prevC + addC;
-
-          const prevT = Number(prev.contract[item.key]) || 0;
-          const addT = Number(cleanContract[item.key]) || 0;
-          if (prevT + addT > 0) prev.contract[item.key] = prevT + addT;
-        });
-        if (note) {
-          prev.note = prev.note ? `${prev.note} + ${note}` : note;
-        }
-        showToast(`تم دمج الحالات الجديدة مع عيادة ${dateStr}`);
-      } else {
-        bucket.days.push({
-          date: dateStr,
-          note,
-          cash: cleanCash,
-          contract: cleanContract
-        });
-        showToast(`تمت إضافة عيادة ${dateStr} إلى إجمالي الشهر`);
-      }
-
-      // Sort chronologically
-      bucket.days.sort((a, b) => a.date.localeCompare(b.date));
-      saveLedgerData();
-
-      // Switch active month view & exit edit mode
-      document.getElementById('activeMonthInput').value = targetMonthKey;
-      exitEditMode(false);
-      renderMonthlyDashboard();
-    }
-
-    function editClinicDay(dateStr) {
-      const monthKey = document.getElementById('activeMonthInput').value;
-      const bucket = ensureMonthBucket(monthKey);
-      const dayRec = bucket.days.find(d => d.date === dateStr);
-      if (!dayRec) return;
-
-      editingOriginalDate = dateStr;
-      document.getElementById('clinicDateInput').value = dayRec.date;
-      document.getElementById('clinicDayNameBadge').textContent = getArabicWeekday(dayRec.date);
-      document.getElementById('clinicNoteInput').value = dayRec.note || '';
-
-      currentDraft = {
-        cash: { ...(dayRec.cash || {}) },
-        contract: { ...(dayRec.contract || {}) }
-      };
-
-      // Update UI to Edit Mode
-      document.getElementById('entryModeBadge').textContent = `تعديل عيادة ${dateStr}`;
-      document.getElementById('entryModeBadge').className = 'px-3 py-1 rounded-xl bg-amber-500/25 border border-amber-300/50 text-amber-200 text-xs font-extrabold';
-      document.getElementById('saveClinicDayBtnText').textContent = 'حفظ تعديل العيادة';
-      document.getElementById('saveClinicDayBtn').className = 'px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-extrabold shadow-lg transition flex items-center gap-2 cursor-pointer';
-      document.getElementById('cancelEditBtn').classList.remove('hidden');
-      document.getElementById('existingDateNotice').classList.add('hidden');
-
-      renderEntryFormCards();
-      document.getElementById('clinicEntrySection').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function cancelEditMode() {
-      exitEditMode(true);
-      showToast('تم إلغاء وضع التعديل');
-    }
-
-    function exitEditMode(keepDate = true) {
-      editingOriginalDate = null;
-      currentDraft = { cash: {}, contract: {} };
-      if (!keepDate) {
-        document.getElementById('clinicNoteInput').value = '';
-      } else {
-        document.getElementById('clinicNoteInput').value = '';
-      }
-      document.getElementById('entryModeBadge').textContent = 'تسجيل عيادة جديدة';
-      document.getElementById('entryModeBadge').className = 'px-3 py-1 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-xs font-extrabold';
-      document.getElementById('saveClinicDayBtnText').textContent = 'إضافة العيادة إلى إجمالي الشهر';
-      document.getElementById('saveClinicDayBtn').className = 'px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-extrabold shadow-lg shadow-emerald-950/50 transition flex items-center gap-2 cursor-pointer';
-      document.getElementById('cancelEditBtn').classList.add('hidden');
-
-      renderEntryFormCards();
-      handleClinicDateChange();
-    }
-
-    function resetCurrentDayForm() {
-      currentDraft = { cash: {}, contract: {} };
-      document.getElementById('clinicNoteInput').value = '';
-      renderEntryFormCards();
-      showToast('تم تصفير عدادات اليوم');
-    }
-
-    function promptDeleteClinicDay(dateStr) {
-      openConfirmModal(
-        `حذف عيادة ${dateStr}`,
-        `هل تريد حذف سجل عيادة يوم ${dateStr} (${getArabicWeekday(dateStr)}) من إجمالي الشهر؟`,
-        () => {
-          const monthKey = document.getElementById('activeMonthInput').value;
-          const bucket = ensureMonthBucket(monthKey);
-          bucket.days = bucket.days.filter(d => d.date !== dateStr);
-          saveLedgerData();
-          if (editingOriginalDate === dateStr) {
-            exitEditMode(true);
-          } else {
-            handleClinicDateChange();
-          }
-          renderMonthlyDashboard();
-          showToast(`تم حذف عيادة ${dateStr}`);
-        }
-      );
-    }
-
-    function promptClearActiveMonthDays() {
-      const monthKey = document.getElementById('activeMonthInput').value;
-      const bucket = ensureMonthBucket(monthKey);
-      if (!bucket.days.length) {
-        showToast('لا توجد أيام مسجلة في هذا الشهر');
-        return;
-      }
-      const titleAr = formatArabicMonthYear(monthKey);
-      openConfirmModal(
-        `حذف جميع أيام ${titleAr}`,
-        `سيتم حذف جميع أيام العيادات المسجلة لشهر ${titleAr} (${bucket.days.length} يوم). هل تريد المتابعة؟`,
-        () => {
-          bucket.days = [];
-          bucket.actualBank = '';
-          saveLedgerData();
-          exitEditMode(true);
-          renderMonthlyDashboard();
-          showToast(`تم مسح سجل شهر ${titleAr}`);
-        }
-      );
-    }
-
-    // =========================================================================
-    // 4. MONTHLY AGGREGATION, LOG TABLE, BREAKDOWN & MULTI-MONTH HISTORY
-    // =========================================================================
-    function computeMonthAggregate(monthKey) {
-      const bucket = ensureMonthBucket(monthKey);
-      const serviceTotals = {};
-      SERVICE_CATALOG.forEach(item => {
-        serviceTotals[item.key] = {
-          cashCount: 0,
-          cashMoney: 0,
-          contractCount: 0,
-          contractMoney: 0,
-          totalCount: 0,
-          totalMoney: 0
-        };
-      });
-
-      let totalCases = 0, cashCases = 0, contractCases = 0;
-      let cashGross = 0, contractGross = 0;
-
-      bucket.days.forEach(day => {
-        SERVICE_CATALOG.forEach(item => {
-          const cCnt = Number((day.cash && day.cash[item.key]) || 0);
-          const tCnt = Number((day.contract && day.contract[item.key]) || 0);
-          const cMoney = cCnt * (Number(priceConfig.cash[item.key]) || 0);
-          const tMoney = tCnt * (Number(priceConfig.contract[item.key]) || 0);
-
-          serviceTotals[item.key].cashCount += cCnt;
-          serviceTotals[item.key].cashMoney += cMoney;
-          serviceTotals[item.key].contractCount += tCnt;
-          serviceTotals[item.key].contractMoney += tMoney;
-          serviceTotals[item.key].totalCount += (cCnt + tCnt);
-          serviceTotals[item.key].totalMoney += (cMoney + tMoney);
-
-          cashCases += cCnt;
-          contractCases += tCnt;
-          totalCases += (cCnt + tCnt);
-          cashGross += cMoney;
-          contractGross += tMoney;
-        });
-      });
-
-      const gross = cashGross + contractGross;
-      const taxRate = Number(priceConfig.taxRate) || 0;
-      const bankFee = gross > 0 ? (Number(priceConfig.bankFee) || 0) : 0;
-      const taxAmount = gross * (taxRate / 100);
-      const deductions = taxAmount + bankFee;
-      const net = Math.max(0, gross - deductions);
-
-      return {
-        daysCount: bucket.days.length,
-        totalCases,
-        cashCases,
-        contractCases,
-        cashGross,
-        contractGross,
-        gross,
-        taxAmount,
-        bankFee,
-        deductions,
-        net,
-        serviceTotals
-      };
-    }
-
-    function handleActiveMonthChange() {
-      const monthKey = document.getElementById('activeMonthInput').value;
-      if (!monthKey) return;
-      renderMonthlyDashboard();
-    }
-
-    function handleActualBankDepositChange() {
-      const monthKey = document.getElementById('activeMonthInput').value;
-      const bucket = ensureMonthBucket(monthKey);
-      const raw = document.getElementById('actualBankDepositInput').value;
-      bucket.actualBank = raw === '' ? '' : parseFloat(raw);
-      saveLedgerData();
-      renderMonthlyDashboard();
-    }
-
-    function renderMonthlyDashboard() {
-      const monthKey = document.getElementById('activeMonthInput').value || '2026-11';
-      const titleAr = formatArabicMonthYear(monthKey);
-      document.getElementById('activeMonthArabicTitle').textContent = titleAr;
-      document.getElementById('logMonthTitle').textContent = titleAr;
-      document.getElementById('printPeriodLabel').textContent = `الشهر المحاسبي: ${titleAr}`;
-      document.getElementById('printDateLabel').textContent = new Date().toLocaleDateString('ar-EG');
-
-      const bucket = ensureMonthBucket(monthKey);
-      const agg = computeMonthAggregate(monthKey);
-
-      // Update KPI Cards
-      document.getElementById('kpiDaysCount').textContent = agg.daysCount;
-      document.getElementById('kpiTotalCases').textContent = agg.totalCases;
-      document.getElementById('kpiGross').textContent = formatMoney(agg.gross);
-      document.getElementById('kpiCashGross').textContent = Math.round(agg.cashGross).toLocaleString('en-US');
-      document.getElementById('kpiContractGross').textContent = Math.round(agg.contractGross).toLocaleString('en-US');
-
-      document.getElementById('kpiDeductions').textContent = formatMoney(agg.deductions);
-      document.getElementById('kpiTaxRateDisp').textContent = `${priceConfig.taxRate}%`;
-      document.getElementById('kpiTaxAmount').textContent = formatMoney(agg.taxAmount);
-      document.getElementById('kpiBankFeeDisp').textContent = agg.bankFee;
-
-      document.getElementById('kpiNet').textContent = formatMoney(agg.net);
-      const avgClinic = agg.daysCount > 0 ? Math.round(agg.net / agg.daysCount) : 0;
-      document.getElementById('kpiAvgPerClinic').textContent = avgClinic.toLocaleString('en-US');
-      document.getElementById('kpiCashCases').textContent = agg.cashCases;
-      document.getElementById('kpiContractCases').textContent = agg.contractCases;
-
-      // Actual Bank Deposit & Variance Badge
-      const bankInput = document.getElementById('actualBankDepositInput');
-      if (document.activeElement !== bankInput) {
-        bankInput.value = (bucket.actualBank !== '' && bucket.actualBank !== undefined) ? bucket.actualBank : '';
-      }
-
-      const badge = document.getElementById('bankVarianceBadge');
-      if (bucket.actualBank === '' || bucket.actualBank === undefined || isNaN(Number(bucket.actualBank))) {
-        badge.textContent = 'أدخل قيمة الشيك المنصرف للمطابقة';
-        badge.className = 'mt-2.5 text-xs font-extrabold px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 text-center tabular-nums';
-      } else {
-        const actual = Number(bucket.actualBank);
-        const diff = actual - agg.net;
-        if (Math.abs(diff) <= 10) {
-          badge.textContent = `✓ مطابق للشيك الفعلي (فارق ${diff >= 0 ? '+' : ''}${diff.toFixed(2)} ج.م)`;
-          badge.className = 'mt-2.5 text-xs font-extrabold px-3 py-1.5 rounded-xl bg-emerald-600/35 border border-emerald-400/50 text-emerald-200 text-center tabular-nums';
-        } else if (diff > 0) {
-          badge.textContent = `▲ زيادة في المنصرف: +${formatMoney(diff)} ج.م`;
-          badge.className = 'mt-2.5 text-xs font-extrabold px-3 py-1.5 rounded-xl bg-sky-600/40 border border-sky-400/50 text-sky-100 text-center tabular-nums';
-        } else {
-          badge.textContent = `▼ عجز عن المستحق المسجل: ${formatMoney(diff)} ج.م`;
-          badge.className = 'mt-2.5 text-xs font-extrabold px-3 py-1.5 rounded-xl bg-rose-600 border border-rose-300/60 text-white text-center tabular-nums';
-        }
-      }
-
-      renderClinicDaysTable(bucket.days);
-      renderCategoryBreakdownTable(agg.serviceTotals, agg);
-      renderMultiMonthHistoryTable(monthKey);
-    }
-
-    function renderClinicDaysTable(days) {
-      const tbody = document.getElementById('clinicDaysTableBody');
-      if (!days.length) {
-        tbody.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
           <tr>
-            <td colspan="9" class="py-10 px-4 text-center text-slate-400">
-              <p class="text-sm font-bold text-slate-500">لا توجد أيام عيادات مسجلة لهذا الشهر بعد</p>
-              <p class="text-xs mt-1">اختر تاريخ العيادة بالأعلى وأدخل أعداد الحالات ثم اضغط على «إضافة العيادة إلى إجمالي الشهر».</p>
-            </td>
+            <th>التاريخ</th>
+            <th>البيان</th>
+            <th>كشوفات</th>
+            <th>عصب/EMG</th>
+            <th>مخ/rTMS/داخلي</th>
+            <th>إجمالي اليوم</th>
+            <th>إجراء</th>
           </tr>
-        `;
-        return;
+        </thead>
+        <tbody id="clinicLogBody">
+          <tr><td colspan="7" style="text-align:center; color:var(--muted); padding:16px;">لا توجد عيادات مسجلة لهذا الشهر بعد. ابدأ بإدخال عيادة اليوم أعلاه.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Bank Reconciliation -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">🏦 مطابقة الشيك البنكي المنصرف</h2>
+    </div>
+    <div class="form-row" style="align-items:end;">
+      <div>
+        <label class="field-label">المبلغ المودع فعلياً في الحساب البنكي (ج.م)</label>
+        <input type="number" id="actualBankPaid" placeholder="أدخل قيمة الشيك المنصرف" oninput="saveActualPaid()">
+      </div>
+      <div class="reconcile-box" id="reconcileResult">
+        أدخل قيمة الشيك المنصرف لمقارنتها بصافي المستحق المتوقع.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Price Editor Modal -->
+<div class="modal-backdrop" id="priceModal">
+  <div class="modal">
+    <div class="card-header">
+      <h2 class="card-title">⚙️ تعديل لائحة أسعار المستشفى</h2>
+      <button type="button" class="btn btn-outline" onclick="closePriceModal()">✕ إغلاق</button>
+    </div>
+    <div style="margin-bottom:10px;">
+      <input type="text" id="priceSearch" placeholder="🔍 ابحث عن اسم الخدمة لتعديل سعرها..." oninput="renderPriceModalList()">
+    </div>
+    <div id="priceEditorList"></div>
+    <div style="display:flex; gap:8px; margin-top:14px;">
+      <button type="button" class="btn btn-primary" style="flex:1; justify-content:center;" onclick="saveCustomPrices()">💾 حفظ الأسعار</button>
+      <button type="button" class="btn btn-danger" onclick="resetDefaultPrices()">استعادة الافتراضي</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PRICE_ITEMS = [{"key": "c_cash_eg", "sec": 1, "kind": "cash", "label": "كشف عيادة — نقدي مصري", "defaultPrice": 300}, {"key": "c_cash_for", "sec": 1, "kind": "cash", "label": "كشف عيادة — نقدي أجنبي", "defaultPrice": 300}, {"key": "c_cont", "sec": 1, "kind": "cont", "label": "كشف عيادة — تعاقد", "defaultPrice": 220}, {"key": "nc_cash_motor", "sec": 2, "kind": "cash", "label": "رسم عصب نقدي — عصب حركي (للوحدة)", "defaultPrice": 130}, {"key": "nc_cash_sens", "sec": 2, "kind": "cash", "label": "رسم عصب نقدي — عصب حسي (للوحدة)", "defaultPrice": 130}, {"key": "nc_cash_root", "sec": 2, "kind": "cash", "label": "رسم عصب نقدي — جذور (للوحدة)", "defaultPrice": 130}, {"key": "nc_cash_emg", "sec": 2, "kind": "cash", "label": "رسم عصب نقدي — عضلات (للعضلة)", "defaultPrice": 270}, {"key": "nc_inpcash_motor", "sec": 2, "kind": "cash", "label": "رسم عصب نقدي داخلي — عصب حركي (للوحدة)", "defaultPrice": 260}, {"key": "nc_inpcash_sens", "sec": 2, "kind": "cash", "label": "رسم عصب نقدي داخلي — عصب حسي (للوحدة)", "defaultPrice": 260}, {"key": "nc_inpcash_root", "sec": 2, "kind": "cash", "label": "رسم عصب نقدي داخلي — جذور (للوحدة)", "defaultPrice": 260}, {"key": "nc_inpcash_emg", "sec": 2, "kind": "cash", "label": "رسم عصب نقدي داخلي — عضلات (للعضلة)", "defaultPrice": 540}, {"key": "nc_forcash_motor", "sec": 2, "kind": "cash", "label": "رسم عصب نقدي أجنبي — عصب حركي (للوحدة)", "defaultPrice": 130}, {"key": "nc_forcash_sens", "sec": 2, "kind": "cash", "label": "رسم عصب نقدي أجنبي — عصب حسي (للوحدة)", "defaultPrice": 130}, {"key": "nc_forcash_root", "sec": 2, "kind": "cash", "label": "رسم عصب نقدي أجنبي — جذور (للوحدة)", "defaultPrice": 130}, {"key": "nc_forcash_emg", "sec": 2, "kind": "cash", "label": "رسم عصب نقدي أجنبي — عضلات (للعضلة)", "defaultPrice": 270}, {"key": "nc_cont_motor", "sec": 2, "kind": "cont", "label": "رسم عصب تعاقد — عصب حركي (للوحدة)", "defaultPrice": 104}, {"key": "nc_cont_sens", "sec": 2, "kind": "cont", "label": "رسم عصب تعاقد — عصب حسي (للوحدة)", "defaultPrice": 104}, {"key": "nc_cont_root", "sec": 2, "kind": "cont", "label": "رسم عصب تعاقد — جذور (للوحدة)", "defaultPrice": 104}, {"key": "nc_cont_emg", "sec": 2, "kind": "cont", "label": "رسم عصب تعاقد — عضلات (للعضلة)", "defaultPrice": 216}, {"key": "nc_inpcont_motor", "sec": 2, "kind": "cont", "label": "رسم عصب داخلي تعاقد — عصب حركي (للوحدة)", "defaultPrice": 208}, {"key": "nc_inpcont_sens", "sec": 2, "kind": "cont", "label": "رسم عصب داخلي تعاقد — عصب حسي (للوحدة)", "defaultPrice": 208}, {"key": "nc_inpcont_root", "sec": 2, "kind": "cont", "label": "رسم عصب داخلي تعاقد — جذور (للوحدة)", "defaultPrice": 208}, {"key": "nc_inpcont_emg", "sec": 2, "kind": "cont", "label": "رسم عصب داخلي تعاقد — عضلات (للعضلة)", "defaultPrice": 432}, {"key": "np_1_cash", "sec": 2, "kind": "cash", "label": "رسم عصب طرف واحد (نقدي)", "defaultPrice": 780}, {"key": "np_1_cont", "sec": 2, "kind": "cont", "label": "رسم عصب طرف واحد (تعاقد)", "defaultPrice": 624}, {"key": "np_2_cash", "sec": 2, "kind": "cash", "label": "رسم عصب طرفين (نقدي)", "defaultPrice": 1560}, {"key": "np_2_cont", "sec": 2, "kind": "cont", "label": "رسم عصب طرفين (تعاقد)", "defaultPrice": 1248}, {"key": "np_4_cash", "sec": 2, "kind": "cash", "label": "رسم عصب أربع أطراف (نقدي)", "defaultPrice": 3120}, {"key": "np_4_cont", "sec": 2, "kind": "cont", "label": "رسم عصب أربع أطراف (تعاقد)", "defaultPrice": 2496}, {"key": "np_face_cash", "sec": 2, "kind": "cash", "label": "رسم عصب وجه (نقدي)", "defaultPrice": 780}, {"key": "np_face_cont", "sec": 2, "kind": "cont", "label": "رسم عصب وجه (تعاقد)", "defaultPrice": 624}, {"key": "np_1emg_cash", "sec": 2, "kind": "cash", "label": "رسم عصب طرف واحد وعضلات (نقدي)", "defaultPrice": 1320}, {"key": "np_1emg_cont", "sec": 2, "kind": "cont", "label": "رسم عصب طرف واحد وعضلات (تعاقد)", "defaultPrice": 1056}, {"key": "np_2emg_cash", "sec": 2, "kind": "cash", "label": "رسم عصب طرفين وعضلات (نقدي)", "defaultPrice": 2100}, {"key": "np_2emg_cont", "sec": 2, "kind": "cont", "label": "رسم عصب طرفين وعضلات (تعاقد)", "defaultPrice": 1680}, {"key": "np_4emg_cash", "sec": 2, "kind": "cash", "label": "رسم عصب ٤ أطراف وعضلات (نقدي)", "defaultPrice": 3660}, {"key": "np_4emg_cont", "sec": 2, "kind": "cont", "label": "رسم عصب ٤ أطراف وعضلات (تعاقد)", "defaultPrice": 2928}, {"key": "np_faceemg_cash", "sec": 2, "kind": "cash", "label": "رسم عصب وجه وعضلات (نقدي)", "defaultPrice": 1320}, {"key": "np_faceemg_cont", "sec": 2, "kind": "cont", "label": "رسم عصب وجه وعضلات (تعاقد)", "defaultPrice": 1056}, {"key": "np_plex_cash", "sec": 2, "kind": "cash", "label": "رسم عصب ضفيرة عصبية وعضلات (نقدي)", "defaultPrice": 1560}, {"key": "np_plex_cont", "sec": 2, "kind": "cont", "label": "رسم عصب ضفيرة عصبية وعضلات (تعاقد)", "defaultPrice": 1248}, {"key": "np_mg_cash", "sec": 2, "kind": "cash", "label": "رسم عصب وهن عضلات (نقدي)", "defaultPrice": 1560}, {"key": "np_mg_cont", "sec": 2, "kind": "cont", "label": "رسم عصب وهن عضلات (تعاقد)", "defaultPrice": 1248}, {"key": "np_inp2x_cash", "sec": 2, "kind": "cash", "label": "فحص عصب / عضلات داخلي طرف واحد 2x (نقدي)", "defaultPrice": 1560}, {"key": "np_inp2x_cont", "sec": 2, "kind": "cont", "label": "فحص عصب / عضلات داخلي طرف واحد 2x (تعاقد)", "defaultPrice": 1248}, {"key": "np_4emg_inp2x_cash", "sec": 2, "kind": "cash", "label": "فحص ٤ أطراف عصب وعضلات داخلي 2x (نقدي)", "defaultPrice": 7320}, {"key": "np_4emg_inp2x_cont", "sec": 2, "kind": "cont", "label": "فحص ٤ أطراف عصب وعضلات داخلي 2x (تعاقد)", "defaultPrice": 5856}, {"key": "eeg_reg_cash", "sec": 3, "kind": "cash", "label": "رسم مخ عادي — نقدي", "defaultPrice": 270}, {"key": "eeg_reg_forcash", "sec": 3, "kind": "cash", "label": "رسم مخ عادي — نقدي أجنبي", "defaultPrice": 270}, {"key": "eeg_reg_inpcash", "sec": 3, "kind": "cash", "label": "رسم مخ عادي — داخلي نقدي", "defaultPrice": 540}, {"key": "eeg_reg_cont", "sec": 3, "kind": "cont", "label": "رسم مخ عادي — تعاقد", "defaultPrice": 255}, {"key": "eeg_reg_inpcont", "sec": 3, "kind": "cont", "label": "رسم مخ عادي — تعاقد داخلي", "defaultPrice": 510}, {"key": "eeg_1h_cash", "sec": 3, "kind": "cash", "label": "رسم مخ ساعة — نقدي", "defaultPrice": 360}, {"key": "eeg_1h_forcash", "sec": 3, "kind": "cash", "label": "رسم مخ ساعة — نقدي أجنبي", "defaultPrice": 360}, {"key": "eeg_1h_inpcash", "sec": 3, "kind": "cash", "label": "رسم مخ ساعة — داخلي نقدي", "defaultPrice": 720}, {"key": "eeg_1h_cont", "sec": 3, "kind": "cont", "label": "رسم مخ ساعة — تعاقد", "defaultPrice": 306}, {"key": "eeg_1h_inpcont", "sec": 3, "kind": "cont", "label": "رسم مخ ساعة — تعاقد داخلي", "defaultPrice": 612}, {"key": "eeg_2h_cash", "sec": 3, "kind": "cash", "label": "رسم مخ ساعتين — نقدي", "defaultPrice": 480}, {"key": "eeg_2h_forcash", "sec": 3, "kind": "cash", "label": "رسم مخ ساعتين — نقدي أجنبي", "defaultPrice": 480}, {"key": "eeg_2h_inpcash", "sec": 3, "kind": "cash", "label": "رسم مخ ساعتين — داخلي نقدي", "defaultPrice": 960}, {"key": "eeg_2h_cont", "sec": 3, "kind": "cont", "label": "رسم مخ ساعتين — تعاقد", "defaultPrice": 408}, {"key": "eeg_2h_inpcont", "sec": 3, "kind": "cont", "label": "رسم مخ ساعتين — تعاقد داخلي", "defaultPrice": 816}, {"key": "eeg_3h_cash", "sec": 3, "kind": "cash", "label": "رسم مخ ٣ ساعات — نقدي", "defaultPrice": 720}, {"key": "eeg_3h_forcash", "sec": 3, "kind": "cash", "label": "رسم مخ ٣ ساعات — نقدي أجنبي", "defaultPrice": 720}, {"key": "eeg_3h_inpcash", "sec": 3, "kind": "cash", "label": "رسم مخ ٣ ساعات — داخلي نقدي", "defaultPrice": 1440}, {"key": "eeg_3h_cont", "sec": 3, "kind": "cont", "label": "رسم مخ ٣ ساعات — تعاقد", "defaultPrice": 600}, {"key": "eeg_3h_inpcont", "sec": 3, "kind": "cont", "label": "رسم مخ ٣ ساعات — تعاقد داخلي", "defaultPrice": 1200}, {"key": "eeg_6h_cash", "sec": 3, "kind": "cash", "label": "رسم مخ ٦ ساعات — نقدي", "defaultPrice": 840}, {"key": "eeg_6h_forcash", "sec": 3, "kind": "cash", "label": "رسم مخ ٦ ساعات — نقدي أجنبي", "defaultPrice": 840}, {"key": "eeg_6h_inpcash", "sec": 3, "kind": "cash", "label": "رسم مخ ٦ ساعات — داخلي نقدي", "defaultPrice": 1680}, {"key": "eeg_6h_cont", "sec": 3, "kind": "cont", "label": "رسم مخ ٦ ساعات — تعاقد", "defaultPrice": 840}, {"key": "eeg_6h_inpcont", "sec": 3, "kind": "cont", "label": "رسم مخ ٦ ساعات — تعاقد داخلي", "defaultPrice": 1680}, {"key": "eeg_vid_cash", "sec": 3, "kind": "cash", "label": "رسم مخ بالفيديو (٦–٨ س) — نقدي", "defaultPrice": 1650}, {"key": "eeg_vid_forcash", "sec": 3, "kind": "cash", "label": "رسم مخ بالفيديو (٦–٨ س) — نقدي أجنبي", "defaultPrice": 1650}, {"key": "eeg_vid_inpcash", "sec": 3, "kind": "cash", "label": "رسم مخ بالفيديو (٦–٨ س) — داخلي نقدي", "defaultPrice": 3300}, {"key": "eeg_vid_cont", "sec": 3, "kind": "cont", "label": "رسم مخ بالفيديو (٦–٨ س) — تعاقد", "defaultPrice": 1320}, {"key": "eeg_vid_inpcont", "sec": 3, "kind": "cont", "label": "رسم مخ بالفيديو (٦–٨ س) — تعاقد داخلي", "defaultPrice": 2640}, {"key": "rtms_cash", "sec": 4, "kind": "cash", "label": "جلسة rTMS — نقدي", "defaultPrice": 375}, {"key": "rtms_forcash", "sec": 4, "kind": "cash", "label": "جلسة rTMS — نقدي أجنبي", "defaultPrice": 375}, {"key": "rtms_inpcash", "sec": 4, "kind": "cash", "label": "جلسة rTMS — داخلي نقدي", "defaultPrice": 750}, {"key": "rtms_cont", "sec": 4, "kind": "cont", "label": "جلسة rTMS — تعاقد", "defaultPrice": 162}, {"key": "rtms_inpcont", "sec": 4, "kind": "cont", "label": "جلسة rTMS — تعاقد داخلي", "defaultPrice": 324}, {"key": "inp_cash", "sec": 5, "kind": "cash", "label": "مرور حالات داخلي — نقدي", "defaultPrice": 300}, {"key": "inp_forcash", "sec": 5, "kind": "cash", "label": "مرور حالات داخلي — نقدي أجنبي", "defaultPrice": 300}, {"key": "inp_inpcash", "sec": 5, "kind": "cash", "label": "مرور حالات داخلي — داخلي نقدي", "defaultPrice": 300}, {"key": "inp_cont", "sec": 5, "kind": "cont", "label": "مرور حالات داخلي — تعاقد", "defaultPrice": 220}, {"key": "inp_inpcont", "sec": 5, "kind": "cont", "label": "مرور حالات داخلي — تعاقد داخلي", "defaultPrice": 220}];
+
+const NERVE_PREFIXES = ['nc_cash', 'nc_inpcash', 'nc_forcash', 'nc_cont', 'nc_inpcont'];
+const NERVE_SUFFIXES = ['motor', 'sens', 'root', 'emg'];
+const PACKAGE_IDS = ['np_1', 'np_2', 'np_4', 'np_face', 'np_1emg', 'np_2emg', 'np_4emg', 'np_faceemg', 'np_plex', 'np_mg', 'np_inp2x', 'np_4emg_inp2x'];
+const MULTI_PREFIXES = ['eeg_reg', 'eeg_1h', 'eeg_2h', 'eeg_3h', 'eeg_6h', 'eeg_vid', 'rtms', 'inp'];
+
+const STORAGE_KEY = 'neuro_clinic_github_v6';
+let appState = {
+  prices: {},
+  entries: [],
+  actualPaidByMonth: {}
+};
+
+let draftCounts = {};
+let editingEntryId = null;
+
+function initPrices() {
+  const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('neuro_clinic_github_v5');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed && Array.isArray(parsed.entries)) {
+        appState.entries = parsed.entries;
       }
-
-      const sorted = [...days].sort((a, b) => a.date.localeCompare(b.date));
-
-      tbody.innerHTML = sorted.map(day => {
-        const m = computeDayMetrics(day);
-        const weekday = getArabicWeekday(day.date);
-
-        // Highlight if 3-hour EEG was recorded on this day
-        const eeg3hCnt = (Number(day.cash?.eeg_3h) || 0) + (Number(day.contract?.eeg_3h) || 0);
-        const eeg3hTag = eeg3hCnt > 0
-          ? `<span class="mr-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-extrabold">منها ${eeg3hCnt} (٣ ساعات)</span>`
-          : '';
-
-        return `
-          <tr class="hover:bg-slate-50/90 transition ${editingOriginalDate === day.date ? 'bg-amber-50/70' : ''}">
-            <td class="py-3 px-3.5 whitespace-nowrap">
-              <div class="font-extrabold text-slate-900 tabular-nums">${day.date}</div>
-              <div class="text-[11px] font-bold text-teal-700">${weekday}</div>
-            </td>
-            <td class="py-3 px-3.5 text-slate-700 font-semibold">
-              ${day.note ? escapeHtml(day.note) : '<span class="text-slate-400 text-xs">عيادة اعتيادية</span>'}
-            </td>
-            <td class="py-3 px-3.5 text-center tabular-nums">
-              <span class="font-bold text-slate-800">${m.consultCases}</span>
-              <span class="block text-[11px] text-slate-500">${formatMoney(m.consultTotal)} ج</span>
-            </td>
-            <td class="py-3 px-3.5 text-center tabular-nums">
-              <span class="font-bold text-slate-800">${m.ncsCases}</span>
-              <span class="block text-[11px] text-slate-500">${formatMoney(m.ncsTotal)} ج</span>
-            </td>
-            <td class="py-3 px-3.5 text-center tabular-nums">
-              <span class="font-bold text-slate-800">${m.eegCases}</span> ${eeg3hTag}
-              <span class="block text-[11px] text-slate-500">${formatMoney(m.eegTotal)} ج</span>
-            </td>
-            <td class="py-3 px-3.5 text-left font-bold text-emerald-700 tabular-nums">${formatMoney(m.cashGross)}</td>
-            <td class="py-3 px-3.5 text-left font-bold text-blue-700 tabular-nums">${formatMoney(m.contractGross)}</td>
-            <td class="py-3 px-3.5 text-left font-extrabold text-slate-900 tabular-nums">${formatMoney(m.gross)}</td>
-            <td class="py-3 px-3.5 text-center whitespace-nowrap no-print">
-              <div class="inline-flex items-center gap-1.5">
-                <button type="button" onclick="editClinicDay('${day.date}')" class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold transition cursor-pointer">
-                  تعديل
-                </button>
-                <button type="button" onclick="promptDeleteClinicDay('${day.date}')" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition cursor-pointer">
-                  حذف
-                </button>
-              </div>
-            </td>
-          </tr>
-        `;
-      }).join('');
+      if (parsed && parsed.actualPaidByMonth) {
+        appState.actualPaidByMonth = parsed.actualPaidByMonth;
+      }
+      if (parsed && parsed.prices) {
+        PRICE_ITEMS.forEach(item => {
+          const oldVal = parsed.prices[item.key];
+          // Migrate old zero nerve component placeholders to the newly derived unit prices
+          if (typeof oldVal === 'number' && !(item.key.startsWith('nc_') && oldVal === 0)) {
+            appState.prices[item.key] = oldVal;
+          }
+        });
+      }
+    } catch (e) {}
+  }
+  PRICE_ITEMS.forEach(item => {
+    if (typeof appState.prices[item.key] !== 'number') {
+      appState.prices[item.key] = item.defaultPrice;
     }
+  });
+  persist();
+}
 
-    function renderCategoryBreakdownTable(serviceTotals, agg) {
-      const tbody = document.getElementById('categoryBreakdownBody');
-      const activeItems = SERVICE_CATALOG.filter(item => serviceTotals[item.key].totalCount > 0);
+function persist() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+  } catch (e) {}
+}
 
-      if (!activeItems.length) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="8" class="py-6 px-4 text-center text-xs text-slate-400">
-              يظهر هنا التفصيل التجميعي للخدمات بمجرد إضافة أيام عيادات للشهر.
-            </td>
-          </tr>
-        `;
-        return;
-      }
+function getPrice(key) {
+  return Number(appState.prices[key] || 0);
+}
 
-      const rowsHtml = activeItems.map(item => {
-        const st = serviceTotals[item.key];
-        return `
-          <tr class="hover:bg-slate-50">
-            <td class="py-2.5 px-4 text-xs font-bold text-slate-500">${escapeHtml(item.sectionName)}</td>
-            <td class="py-2.5 px-4 font-bold text-slate-800">
-              ${escapeHtml(item.label)}
-              ${item.isNew ? '<span class="mr-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-extrabold">٣ ساعات</span>' : ''}
-            </td>
-            <td class="py-2.5 px-4 text-center font-bold text-emerald-700 tabular-nums">${st.cashCount}</td>
-            <td class="py-2.5 px-4 text-left text-emerald-800 font-semibold tabular-nums">${formatMoney(st.cashMoney)}</td>
-            <td class="py-2.5 px-4 text-center font-bold text-blue-700 tabular-nums">${st.contractCount}</td>
-            <td class="py-2.5 px-4 text-left text-blue-800 font-semibold tabular-nums">${formatMoney(st.contractMoney)}</td>
-            <td class="py-2.5 px-4 text-center font-extrabold text-slate-900 tabular-nums">${st.totalCount}</td>
-            <td class="py-2.5 px-4 text-left font-extrabold text-slate-900 tabular-nums">${formatMoney(st.totalMoney)}</td>
-          </tr>
-        `;
-      }).join('');
+function refreshPriceLabels() {
+  ['c_cash_eg', 'c_cash_for', 'c_cont'].forEach(k => {
+    const el = document.getElementById('pr_' + k);
+    if (el) el.textContent = `سعر الحالة: ${getPrice(k)} ج.م`;
+  });
+  PRICE_ITEMS.forEach(item => {
+    const el = document.getElementById('pr_' + item.key);
+    if (el && item.key !== 'c_cash_eg' && item.key !== 'c_cash_for' && item.key !== 'c_cont') {
+      el.textContent = `${getPrice(item.key)} ج.م`;
+    }
+  });
+  PACKAGE_IDS.forEach(pid => {
+    const el = document.getElementById('pr_pair_' + pid);
+    if (el) {
+      el.textContent = `نقدي: ${getPrice(pid + '_cash')} ج | تعاقد: ${getPrice(pid + '_cont')} ج`;
+    }
+  });
+}
 
-      const footerRow = `
-        <tr class="bg-slate-100 font-extrabold text-slate-900 border-t-2 border-slate-300">
-          <td colspan="2" class="py-3 px-4">الإجمالي الكلي للشهر</td>
-          <td class="py-3 px-4 text-center text-emerald-800 tabular-nums">${agg.cashCases}</td>
-          <td class="py-3 px-4 text-left text-emerald-800 tabular-nums">${formatMoney(agg.cashGross)}</td>
-          <td class="py-3 px-4 text-center text-blue-800 tabular-nums">${agg.contractCases}</td>
-          <td class="py-3 px-4 text-left text-blue-800 tabular-nums">${formatMoney(agg.contractGross)}</td>
-          <td class="py-3 px-4 text-center tabular-nums">${agg.totalCases}</td>
-          <td class="py-3 px-4 text-left text-teal-900 tabular-nums">${formatMoney(agg.gross)}</td>
-        </tr>
+function syncDraftUI() {
+  PRICE_ITEMS.forEach(item => {
+    const inp = document.getElementById('val_' + item.key);
+    if (inp) inp.value = draftCounts[item.key] || 0;
+  });
+
+  NERVE_PREFIXES.forEach(pref => {
+    let cnt = 0;
+    NERVE_SUFFIXES.forEach(suf => { cnt += (draftCounts[pref + '_' + suf] || 0); });
+    const b = document.getElementById('badge_' + pref);
+    if (b) b.textContent = `${cnt} وحدة`;
+  });
+
+  MULTI_PREFIXES.forEach(pref => {
+    const subs = ['cash', 'forcash', 'inpcash', 'cont', 'inpcont'];
+    let amt = 0;
+    subs.forEach(s => {
+      const k = pref + '_' + s;
+      amt += (draftCounts[k] || 0) * getPrice(k);
+    });
+    const el = document.getElementById('rowamt_' + pref);
+    if (el) el.textContent = `${amt.toLocaleString('ar-EG')} ج.م`;
+  });
+
+  const secSums = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  let total = 0;
+  PRICE_ITEMS.forEach(item => {
+    const amt = (draftCounts[item.key] || 0) * getPrice(item.key);
+    secSums[item.sec] += amt;
+    total += amt;
+  });
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('sec' + i + 'Sub');
+    if (el) el.textContent = `${secSums[i].toLocaleString('ar-EG')} ج.م`;
+  }
+  document.getElementById('draftTotal').textContent = `إجمالي اليوم: ${total.toLocaleString('ar-EG')} ج.م`;
+}
+
+function stepKey(key, delta) {
+  draftCounts[key] = Math.max(0, (draftCounts[key] || 0) + delta);
+  syncDraftUI();
+}
+
+function setKey(key, val) {
+  const n = Math.max(0, parseInt(val, 10) || 0);
+  draftCounts[key] = n;
+  syncDraftUI();
+}
+
+function resetDraft() {
+  draftCounts = {};
+  PRICE_ITEMS.forEach(item => { draftCounts[item.key] = 0; });
+  editingEntryId = null;
+  document.getElementById('entryModeTitle').textContent = '➕ تسجيل شغل عيادة اليوم';
+  document.getElementById('saveClinicBtn').textContent = '✅ إضافة العيادة إلى إجمالي الشهر';
+  document.getElementById('cancelEditBtn').style.display = 'none';
+  document.getElementById('clinicNote').value = '';
+  syncDraftUI();
+}
+
+function saveClinicEntry() {
+  const dateVal = document.getElementById('clinicDate').value;
+  if (!dateVal) {
+    alert('يرجى اختيار تاريخ العيادة أولاً');
+    return;
+  }
+  const hasAny = PRICE_ITEMS.some(item => (draftCounts[item.key] || 0) > 0);
+  if (!hasAny) {
+    alert('يرجى إدخال حالة واحدة على الأقل قبل الحفظ');
+    return;
+  }
+
+  const monthKey = dateVal.slice(0, 7);
+  const noteVal = document.getElementById('clinicNote').value.trim() || 'عيادة';
+  const clonedCounts = {};
+  PRICE_ITEMS.forEach(item => {
+    if ((draftCounts[item.key] || 0) > 0) {
+      clonedCounts[item.key] = draftCounts[item.key];
+    }
+  });
+
+  if (editingEntryId) {
+    const idx = appState.entries.findIndex(e => e.id === editingEntryId);
+    if (idx !== -1) {
+      appState.entries[idx] = { id: editingEntryId, month: monthKey, date: dateVal, note: noteVal, counts: clonedCounts };
+    }
+  } else {
+    appState.entries.push({
+      id: 'ent_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+      month: monthKey,
+      date: dateVal,
+      note: noteVal,
+      counts: clonedCounts
+    });
+  }
+
+  document.getElementById('activeMonth').value = monthKey;
+  persist();
+  resetDraft();
+  renderAll();
+}
+
+function editEntry(id) {
+  const ent = appState.entries.find(e => e.id === id);
+  if (!ent) return;
+  editingEntryId = id;
+  document.getElementById('clinicDate').value = ent.date;
+  document.getElementById('clinicNote').value = ent.note;
+  draftCounts = {};
+  PRICE_ITEMS.forEach(item => {
+    draftCounts[item.key] = ent.counts[item.key] || 0;
+  });
+  document.getElementById('entryModeTitle').textContent = `✏️ تعديل سجل يوم ${ent.date}`;
+  document.getElementById('saveClinicBtn').textContent = '💾 حفظ التعديل';
+  document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+  syncDraftUI();
+  window.scrollTo({ top: 180, behavior: 'smooth' });
+}
+
+function cancelEdit() {
+  resetDraft();
+}
+
+function deleteEntry(id) {
+  if (!confirm('هل تريد حذف سجل هذا اليوم من الشهر؟')) return;
+  appState.entries = appState.entries.filter(e => e.id !== id);
+  if (editingEntryId === id) resetDraft();
+  persist();
+  renderAll();
+}
+
+function clearCurrentMonth() {
+  const m = document.getElementById('activeMonth').value;
+  if (!confirm(`هل تريد مسح جميع سجلات شهر ${m}؟`)) return;
+  appState.entries = appState.entries.filter(e => e.month !== m);
+  delete appState.actualPaidByMonth[m];
+  persist();
+  renderAll();
+}
+
+function calcEntryStats(ent) {
+  let cashAmt = 0, contAmt = 0, cashCnt = 0, contCnt = 0;
+  let sec1Cnt = 0, sec2Cnt = 0, sec345Cnt = 0;
+  PRICE_ITEMS.forEach(item => {
+    const c = ent.counts[item.key] || 0;
+    if (!c) return;
+    const amt = c * getPrice(item.key);
+    if (item.kind === 'cash') {
+      cashAmt += amt;
+      cashCnt += c;
+    } else {
+      contAmt += amt;
+      contCnt += c;
+    }
+    if (item.sec === 1) sec1Cnt += c;
+    else if (item.sec === 2) sec2Cnt += c;
+    else sec345Cnt += c;
+  });
+  return { cashAmt, contAmt, total: cashAmt + contAmt, cashCnt, contCnt, sec1Cnt, sec2Cnt, sec345Cnt };
+}
+
+function renderAll() {
+  const m = document.getElementById('activeMonth').value;
+  const monthEntries = appState.entries
+    .filter(e => e.month === m)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  let sumCash = 0, sumCont = 0, cntCash = 0, cntCont = 0;
+  const tbody = document.getElementById('clinicLogBody');
+  tbody.innerHTML = '';
+
+  if (monthEntries.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--muted); padding:16px;">لا توجد عيادات مسجلة لهذا الشهر بعد. ابدأ بإدخال عيادة اليوم أعلاه.</td></tr>`;
+  } else {
+    monthEntries.forEach(ent => {
+      const st = calcEntryStats(ent);
+      sumCash += st.cashAmt;
+      sumCont += st.contAmt;
+      cntCash += st.cashCnt;
+      cntCont += st.contCnt;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="white-space:nowrap; font-weight:700;">${ent.date}</td>
+        <td>${ent.note}</td>
+        <td>${st.sec1Cnt}</td>
+        <td>${st.sec2Cnt}</td>
+        <td>${st.sec345Cnt}</td>
+        <td style="font-weight:800; color:var(--primary);">${st.total.toLocaleString('ar-EG')} ج</td>
+        <td style="white-space:nowrap;">
+          <button type="button" class="btn btn-outline" style="padding:4px 7px; font-size:0.72rem;" onclick="editEntry('${ent.id}')">تعديل</button>
+          <button type="button" class="btn btn-danger" style="padding:4px 7px; font-size:0.72rem;" onclick="deleteEntry('${ent.id}')">حذف</button>
+        </td>
       `;
-
-      tbody.innerHTML = rowsHtml + footerRow;
-    }
-
-    function renderMultiMonthHistoryTable(currentMonthKey) {
-      const tbody = document.getElementById('multiMonthHistoryBody');
-      const keys = Object.keys(ledgerData)
-        .filter(k => {
-          const b = ledgerData[k];
-          return (b && b.days && b.days.length > 0) || (b && b.actualBank !== '' && b.actualBank !== undefined) || k === currentMonthKey;
-        })
-        .sort((a, b) => b.localeCompare(a));
-
-      if (!keys.length) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="7" class="py-6 px-4 text-center text-xs text-slate-400">لا توجد شهور محفوظة بعد.</td>
-          </tr>
-        `;
-        return;
-      }
-
-      tbody.innerHTML = keys.map(key => {
-        const b = ledgerData[key];
-        const agg = computeMonthAggregate(key);
-        const isCurrent = key === currentMonthKey;
-
-        let actualCell = '<span class="text-slate-400 text-xs">—</span>';
-        let diffCell = '<span class="text-slate-400 text-xs">—</span>';
-
-        if (b.actualBank !== '' && b.actualBank !== undefined && !isNaN(Number(b.actualBank))) {
-          const actual = Number(b.actualBank);
-          const diff = actual - agg.net;
-          actualCell = `<span class="font-bold text-slate-800">${formatMoney(actual)}</span>`;
-          if (Math.abs(diff) <= 10) {
-            diffCell = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">مطابق (${diff >= 0 ? '+' : ''}${diff.toFixed(0)})</span>`;
-          } else if (diff > 0) {
-            diffCell = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200">+${formatMoney(diff)}</span>`;
-          } else {
-            diffCell = `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">${formatMoney(diff)}</span>`;
-          }
-        }
-
-        return `
-          <tr class="${isCurrent ? 'bg-teal-50/70' : 'hover:bg-slate-50'} transition">
-            <td class="py-3 px-4 font-extrabold text-slate-800">
-              ${formatArabicMonthYear(key)}
-              ${isCurrent ? '<span class="mr-1.5 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-teal-700 text-white">نشط</span>' : ''}
-            </td>
-            <td class="py-3 px-4 text-center font-bold text-slate-700 tabular-nums">${agg.daysCount} يوم</td>
-            <td class="py-3 px-4 text-center text-xs font-bold tabular-nums">
-              <span class="text-slate-900">${agg.totalCases}</span>
-              <span class="text-slate-400 mx-1">|</span>
-              <span class="text-emerald-700">${agg.cashCases} نقدي</span>
-              <span class="text-slate-300">/</span>
-              <span class="text-blue-700">${agg.contractCases} تعاقد</span>
-            </td>
-            <td class="py-3 px-4 text-left font-extrabold text-teal-800 tabular-nums">${formatMoney(agg.net)}</td>
-            <td class="py-3 px-4 text-left tabular-nums">${actualCell}</td>
-            <td class="py-3 px-4 text-left tabular-nums">${diffCell}</td>
-            <td class="py-3 px-4 text-center no-print">
-              <button type="button" onclick="openMonthFromHistory('${key}')" class="px-3 py-1 rounded-lg bg-slate-100 hover:bg-teal-700 hover:text-white text-slate-700 text-xs font-bold transition cursor-pointer">
-                عرض
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    function openMonthFromHistory(monthKey) {
-      document.getElementById('activeMonthInput').value = monthKey;
-      document.getElementById('clinicDateInput').value = `${monthKey}-01`;
-      handleClinicDateChange();
-      renderMonthlyDashboard();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // =========================================================================
-    // 5. SAMPLE DATA LOADERS (OCTOBER & SEPTEMBER CLINIC DAYS)
-    // =========================================================================
-    function loadSampleMonth(monthKey) {
-      const sample = SAMPLE_MONTHS[monthKey];
-      if (!sample) return;
-
-      const applySample = () => {
-        ledgerData[monthKey] = {
-          actualBank: sample.actualBank,
-          days: sample.days.map(d => ({
-            date: d.date,
-            note: d.note,
-            cash: { ...(d.cash || {}) },
-            contract: { ...(d.contract || {}) }
-          }))
-        };
-        saveLedgerData();
-
-        document.getElementById('activeMonthInput').value = monthKey;
-        document.getElementById('clinicDateInput').value = sample.days[sample.days.length - 1].date;
-        exitEditMode(true);
-        renderMonthlyDashboard();
-        showToast(`تم تحميل سجل عيادات ${formatArabicMonthYear(monthKey)} بنجاح`);
-      };
-
-      const existing = ledgerData[monthKey];
-      if (existing && existing.days && existing.days.length > 0) {
-        openConfirmModal(
-          `تحميل نموذج ${formatArabicMonthYear(monthKey)}`,
-          `توجد أيام مسجلة حالياً لشهر ${formatArabicMonthYear(monthKey)}. هل تريد استبدالها ببيانات العيادات النموذجية؟`,
-          applySample
-        );
-      } else {
-        applySample();
-      }
-    }
-
-    // =========================================================================
-    // 6. EDITABLE PRICE LIST MODAL
-    // =========================================================================
-    function openSettingsModal() {
-      document.getElementById('cfg_taxRate').value = priceConfig.taxRate;
-      document.getElementById('cfg_bankFee').value = priceConfig.bankFee;
-
-      const sections = [
-        { key: 'consult', title: '١. أسعار الكشوفات والمرور الداخلي' },
-        { key: 'ncs', title: '٢. أسعار رسم العصب والعضلات و rTMS' },
-        { key: 'eeg', title: '٣. أسعار رسم المخ بالكمبيوتر (EEG — شامل ٣ ساعات و٦ ساعات)' }
-      ];
-
-      const matrix = document.getElementById('settingsPriceMatrix');
-      matrix.innerHTML = sections.map(sec => {
-        const items = SERVICE_CATALOG.filter(i => i.section === sec.key);
-        return `
-          <div class="border border-slate-200 rounded-2xl overflow-hidden">
-            <div class="bg-slate-100 px-4 py-2.5 text-sm font-extrabold text-slate-800 border-b border-slate-200">${sec.title}</div>
-            <div class="overflow-x-auto">
-              <table class="w-full text-right border-collapse">
-                <thead>
-                  <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-600">
-                    <th class="py-2.5 px-4">الخدمة الطبية</th>
-                    <th class="py-2.5 px-4 text-emerald-800 w-44">سعر النقدي (ج.م)</th>
-                    <th class="py-2.5 px-4 text-blue-800 w-44">سعر التعاقدات (ج.م)</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 text-xs sm:text-sm">
-                  ${items.map(item => `
-                    <tr>
-                      <td class="py-2.5 px-4 font-bold text-slate-800">
-                        ${escapeHtml(item.label)}
-                        ${item.isNew ? '<span class="mr-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-extrabold">٣ ساعات</span>' : ''}
-                      </td>
-                      <td class="py-2 px-4">
-                        <input type="number" step="0.01" id="cfg_cash_${item.key}" value="${priceConfig.cash[item.key]}" class="w-full px-3 py-1.5 rounded-xl border border-emerald-300 bg-emerald-50/40 font-extrabold text-slate-900 tabular-nums focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-                      </td>
-                      <td class="py-2 px-4">
-                        <input type="number" step="0.01" id="cfg_contract_${item.key}" value="${priceConfig.contract[item.key]}" class="w-full px-3 py-1.5 rounded-xl border border-blue-300 bg-blue-50/40 font-extrabold text-slate-900 tabular-nums focus:outline-none focus:ring-2 focus:ring-blue-600" />
-                      </td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      document.getElementById('settingsModal').classList.remove('hidden');
-    }
-
-    function closeSettingsModal() {
-      document.getElementById('settingsModal').classList.add('hidden');
-    }
-
-    function saveSettingsModal() {
-      priceConfig.taxRate = parseFloat(document.getElementById('cfg_taxRate').value) || 0;
-      priceConfig.bankFee = parseFloat(document.getElementById('cfg_bankFee').value) || 0;
-
-      SERVICE_CATALOG.forEach(item => {
-        const cInp = document.getElementById(`cfg_cash_${item.key}`);
-        const tInp = document.getElementById(`cfg_contract_${item.key}`);
-        if (cInp) priceConfig.cash[item.key] = parseFloat(cInp.value) || 0;
-        if (tInp) priceConfig.contract[item.key] = parseFloat(tInp.value) || 0;
-      });
-
-      savePriceConfig();
-      closeSettingsModal();
-      renderEntryFormCards();
-      renderMonthlyDashboard();
-      showToast('تم حفظ تعديلات لائحة الأسعار وتحديث الحسابات');
-    }
-
-    function promptRestoreDefaultPrices() {
-      openConfirmModal(
-        'استعادة الأسعار الافتراضية',
-        'سيتم إرجاع جميع أسعار النقدي والتعاقدات ونسب الاستقطاع إلى القيم الافتراضية المعتمدة. هل تريد المتابعة؟',
-        () => {
-          priceConfig = getDefaultPriceConfig();
-          savePriceConfig();
-          closeSettingsModal();
-          renderEntryFormCards();
-          renderMonthlyDashboard();
-          showToast('تمت استعادة لائحة الأسعار الافتراضية');
-        }
-      );
-    }
-
-    // =========================================================================
-    // 7. CSV EXPORT & HELPERS
-    // =========================================================================
-    function exportActiveMonthCSV() {
-      const monthKey = document.getElementById('activeMonthInput').value || '2026-11';
-      const bucket = ensureMonthBucket(monthKey);
-      if (!bucket.days.length) {
-        showToast('لا توجد أيام مسجلة في هذا الشهر للتصدير');
-        return;
-      }
-
-      const headers = [
-        'التاريخ',
-        'اليوم',
-        'البيان / الملاحظة',
-        'عدد الكشوفات والمرور الداخلي',
-        'عدد رسم العصب والعضلات و TMS',
-        'عدد رسم المخ',
-        'إجمالي النقدي (ج.م)',
-        'إجمالي التعاقد (ج.م)',
-        'الإجمالي الكلي لليوم (ج.م)'
-      ];
-
-      const sorted = [...bucket.days].sort((a, b) => a.date.localeCompare(b.date));
-      const rows = sorted.map(day => {
-        const m = computeDayMetrics(day);
-        return [
-          day.date,
-          `"${getArabicWeekday(day.date)}"`,
-          `"${(day.note || '').replace(/"/g, '""')}"`,
-          m.consultCases,
-          m.ncsCases,
-          m.eegCases,
-          m.cashGross.toFixed(2),
-          m.contractGross.toFixed(2),
-          m.gross.toFixed(2)
-        ].join(',');
-      });
-
-      const agg = computeMonthAggregate(monthKey);
-      rows.push('');
-      rows.push(`"إجمالي الشهر (${formatArabicMonthYear(monthKey)})","","",${agg.totalCases},"","",${agg.cashGross.toFixed(2)},${agg.contractGross.toFixed(2)},${agg.gross.toFixed(2)}`);
-      rows.push(`"الاستقطاعات (${priceConfig.taxRate}% + ${priceConfig.bankFee} ج)","","","","","","","",-${agg.deductions.toFixed(2)}`);
-      rows.push(`"صافي المرتب المتوقع بالبنك","","","","","","","","",${agg.net.toFixed(2)}`.replace(',"",', ','));
-
-      const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `كشف_عيادات_الطبيب_${monthKey}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast('تم تصدير كشف الشهر إلى ملف Excel / CSV');
-    }
-
-    function formatArabicMonthYear(monthKey) {
-      if (!monthKey || !monthKey.includes('-')) return monthKey || '';
-      const [y, m] = monthKey.split('-');
-      return `${ARABIC_MONTHS[m] || m} ${y}`;
-    }
-
-    function getArabicWeekday(dateStr) {
-      if (!dateStr) return '';
-      const parts = dateStr.split('-').map(Number);
-      if (parts.length !== 3) return '';
-      const dt = new Date(parts[0], parts[1] - 1, parts[2]);
-      return ARABIC_WEEKDAYS[dt.getDay()] || '';
-    }
-
-    function formatMoney(num) {
-      return Number(num || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function openConfirmModal(title, message, onConfirm) {
-      document.getElementById('confirmModalTitle').textContent = title;
-      document.getElementById('confirmModalMessage').textContent = message;
-      pendingConfirmCallback = onConfirm;
-      document.getElementById('confirmModal').classList.remove('hidden');
-    }
-
-    function closeConfirmModal() {
-      document.getElementById('confirmModal').classList.add('hidden');
-      pendingConfirmCallback = null;
-    }
-
-    document.getElementById('confirmModalActionBtn').addEventListener('click', () => {
-      if (typeof pendingConfirmCallback === 'function') {
-        pendingConfirmCallback();
-      }
-      closeConfirmModal();
+      tbody.appendChild(tr);
     });
+  }
 
-    let toastTimer = null;
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      document.getElementById('toastMessage').textContent = msg;
-      toast.classList.remove('translate-y-20', 'opacity-0');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        toast.classList.add('translate-y-20', 'opacity-0');
-      }, 3000);
+  const gross = sumCash + sumCont;
+  const deductions = gross > 0 ? (gross * 0.0075 + 16) : 0;
+  const netExpected = Math.max(0, gross - deductions);
+
+  document.getElementById('kpiCash').textContent = `${sumCash.toLocaleString('ar-EG')} ج.م`;
+  document.getElementById('kpiCashCnt').textContent = `${cntCash} بند نقدي`;
+  document.getElementById('kpiCont').textContent = `${sumCont.toLocaleString('ar-EG')} ج.م`;
+  document.getElementById('kpiContCnt').textContent = `${cntCont} بند تعاقد`;
+  document.getElementById('kpiDed').textContent = `${Math.round(deductions).toLocaleString('ar-EG')} ج.م`;
+  document.getElementById('kpiGross').textContent = `الإجمالي: ${gross.toLocaleString('ar-EG')} ج.م`;
+  document.getElementById('kpiNet').textContent = `${Math.round(netExpected).toLocaleString('ar-EG')} ج.م`;
+  document.getElementById('kpiDays').textContent = `${monthEntries.length} سجل بالشهر`;
+  document.getElementById('monthRowCount').textContent = `${monthEntries.length} سجل`;
+
+  const paidInput = document.getElementById('actualBankPaid');
+  paidInput.value = appState.actualPaidByMonth[m] || '';
+  updateReconciliation(netExpected);
+}
+
+function saveActualPaid() {
+  const m = document.getElementById('activeMonth').value;
+  const val = parseFloat(document.getElementById('actualBankPaid').value);
+  if (!isNaN(val) && val > 0) {
+    appState.actualPaidByMonth[m] = val;
+  } else {
+    delete appState.actualPaidByMonth[m];
+  }
+  persist();
+  renderAll();
+}
+
+function updateReconciliation(netExpected) {
+  const m = document.getElementById('activeMonth').value;
+  const actual = appState.actualPaidByMonth[m];
+  const box = document.getElementById('reconcileResult');
+  if (!actual) {
+    box.innerHTML = 'أدخل قيمة الشيك المنصرف لمقارنتها بصافي المستحق المتوقع.';
+    return;
+  }
+  const diff = Math.round(actual - netExpected);
+  if (Math.abs(diff) <= 50) {
+    box.innerHTML = `<span class="diff-pos">✅ مطابق تماماً!</span> الفرق الهامشي: ${diff >= 0 ? '+' : ''}${diff} ج.م فقط.`;
+  } else if (diff > 0) {
+    box.innerHTML = `<span class="diff-pos">📈 زيادة منصرفة: +${diff.toLocaleString('ar-EG')} ج.م</span> (تعاقدات إضافية أو متأخرات سابقة).`;
+  } else {
+    box.innerHTML = `<span class="diff-neg">⚠️ عجز عن المتوقع: ${diff.toLocaleString('ar-EG')} ج.م</span> (راجع الحالات المؤجلة أو الداخلي).`;
+  }
+}
+
+/* Price Modal */
+function openPriceModal() {
+  document.getElementById('priceSearch').value = '';
+  renderPriceModalList();
+  document.getElementById('priceModal').classList.add('open');
+}
+
+function renderPriceModalList() {
+  const q = document.getElementById('priceSearch').value.trim().toLowerCase();
+  const list = document.getElementById('priceEditorList');
+  list.innerHTML = PRICE_ITEMS
+    .filter(item => !q || item.label.toLowerCase().includes(q))
+    .map(item => `
+      <div class="price-edit-row">
+        <div style="font-weight:700;">${item.label}</div>
+        <input type="number" id="pe_${item.key}" value="${getPrice(item.key)}">
+      </div>
+    `).join('');
+}
+
+function closePriceModal() {
+  document.getElementById('priceModal').classList.remove('open');
+}
+
+function saveCustomPrices() {
+  PRICE_ITEMS.forEach(item => {
+    const inp = document.getElementById(`pe_${item.key}`);
+    if (inp) {
+      appState.prices[item.key] = parseFloat(inp.value) || 0;
     }
+  });
+  persist();
+  closePriceModal();
+  refreshPriceLabels();
+  syncDraftUI();
+  renderAll();
+}
 
-    function escapeHtml(str) {
-      return String(str || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
+function resetDefaultPrices() {
+  PRICE_ITEMS.forEach(item => {
+    appState.prices[item.key] = item.defaultPrice;
+  });
+  persist();
+  renderPriceModalList();
+  refreshPriceLabels();
+  syncDraftUI();
+  renderAll();
+}
 
-    // Bootstrap Application
-    window.addEventListener('DOMContentLoaded', () => {
-      // Seed October and September sample clinic records on very first visit for instant comparison
-      if (Object.keys(ledgerData).length === 0) {
-        Object.keys(SAMPLE_MONTHS).forEach(mKey => {
-          ledgerData[mKey] = {
-            actualBank: SAMPLE_MONTHS[mKey].actualBank,
-            days: SAMPLE_MONTHS[mKey].days.map(d => ({
-              date: d.date,
-              note: d.note,
-              cash: { ...(d.cash || {}) },
-              contract: { ...(d.contract || {}) }
-            }))
-          };
-        });
-        saveLedgerData();
+/* Sample Data (Oct & Sep 2026) */
+function loadSample(which) {
+  if (which === 'oct') {
+    const m = '2026-10';
+    appState.entries = appState.entries.filter(e => e.month !== m);
+    appState.entries.push({
+      id: 'sample_oct_1',
+      month: m,
+      date: '2026-10-31',
+      note: 'إجمالي كشف المستشفى الفعلي (أكتوبر)',
+      counts: {
+        c_cash_eg: 6,
+        c_cash_for: 2,
+        c_cont: 50,
+        np_1_cash: 2,
+        np_1_cont: 6,
+        np_2_cash: 1,
+        np_2_cont: 3,
+        np_4emg_inp2x_cash: 1,
+        rtms_cont: 2,
+        eeg_reg_cont: 2,
+        eeg_1h_cash: 1,
+        eeg_2h_cash: 1,
+        eeg_2h_cont: 2
       }
-
-      document.getElementById('clinicDateInput').value = '2026-11-17';
-      document.getElementById('activeMonthInput').value = '2026-11';
-      handleClinicDateChange();
-      renderEntryFormCards();
-      renderMonthlyDashboard();
     });
-  </script>
+    appState.actualPaidByMonth[m] = 34370;
+    document.getElementById('activeMonth').value = m;
+  } else if (which === 'sep') {
+    const m = '2026-09';
+    appState.entries = appState.entries.filter(e => e.month !== m);
+    appState.entries.push({
+      id: 'sample_sep_1',
+      month: m,
+      date: '2026-09-30',
+      note: 'إجمالي كشف المستشفى الفعلي (سبتمبر)',
+      counts: {
+        c_cash_eg: 9,
+        c_cash_for: 2,
+        c_cont: 42,
+        np_1_cash: 1,
+        np_1_cont: 4,
+        np_2_cash: 2,
+        np_2_cont: 5,
+        np_4_cash: 1,
+        np_4_cont: 2,
+        nc_cash_emg: 4,
+        nc_cont_emg: 8,
+        np_4emg_inp2x_cont: 1,
+        rtms_cont: 2,
+        eeg_reg_cont: 4,
+        eeg_1h_cash: 2,
+        eeg_1h_cont: 3,
+        eeg_2h_cash: 4,
+        eeg_2h_cont: 3,
+        eeg_6h_cash: 1,
+        eeg_6h_cont: 1,
+        eeg_vid_cash: 1
+      }
+    });
+    appState.actualPaidByMonth[m] = 48200;
+    document.getElementById('activeMonth').value = m;
+  }
+  persist();
+  renderAll();
+}
+
+/* Export CSV & JSON Backup */
+function exportCSV() {
+  const m = document.getElementById('activeMonth').value;
+  const rows = appState.entries.filter(e => e.month === m);
+  if (rows.length === 0) {
+    alert('لا توجد بيانات مسجلة في هذا الشهر لتصديرها');
+    return;
+  }
+  let csv = '\uFEFFالتاريخ,البيان,إجمالي النقدي,إجمالي التعاقدات,الإجمالي قبل الاستقطاع\n';
+  rows.forEach(r => {
+    const st = calcEntryStats(r);
+    csv += `${r.date},"${r.note}",${st.cashAmt},${st.contAmt},${st.total}\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `clinic_salary_${m}.csv`;
+  a.click();
+}
+
+function exportBackupJSON() {
+  const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `neuro_clinic_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function importBackupJSON(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data && data.entries) {
+        appState = data;
+        persist();
+        refreshPriceLabels();
+        syncDraftUI();
+        renderAll();
+        alert('تم استرجاع النسخة الاحتياطية بنجاح');
+      }
+    } catch (err) {
+      alert('ملف النسخة الاحتياطية غير صالح');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// Boot
+initPrices();
+const today = new Date().toISOString().slice(0, 10);
+document.getElementById('clinicDate').value = today;
+document.getElementById('activeMonth').value = today.slice(0, 7);
+refreshPriceLabels();
+resetDraft();
+renderAll();
+</script>
 </body>
 </html>
